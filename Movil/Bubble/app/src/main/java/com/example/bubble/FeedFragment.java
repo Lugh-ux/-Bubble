@@ -31,6 +31,20 @@ public class FeedFragment extends Fragment {
         listaActividades.add(new Actividad("Carlos", "creó una burbuja 3D", "A 50m", R.drawable.iconobuble));
         listaActividades.add(new Actividad("Marta (Amiga)", "te envió un saludo", "Amigo", R.drawable.iconobuble));
         listaActividades.add(new Actividad("Burbuja Global", "Alguien pasó por Urzáiz", "A 500m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+        listaActividades.add(new Actividad("Test", "Test", "A 100m", R.drawable.iconobuble));
+
 
         ActividadAdapter adapter = new ActividadAdapter(listaActividades);
         recyclerView.setAdapter(adapter);

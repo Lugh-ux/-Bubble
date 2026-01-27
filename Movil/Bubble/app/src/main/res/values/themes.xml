@@ -17,4 +17,7 @@
     <style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="android:paddingTop">12dp</item> <item name="android:paddingBottom">12dp</item>
     </style>
+    <style name="CircleImage">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
