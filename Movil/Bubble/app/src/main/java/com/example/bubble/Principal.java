@@ -9,14 +9,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+
+import android.os.Vibrator;
+import android.os.VibrationEffect;
+import android.os.Build;
+import android.content.Context;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 
 public class Principal extends AppCompatActivity {
 
 
     BottomNavigationView bottomNavigation;
+    FloatingActionButton  botonFlotante;
 
     HomeFragment homeFragment = new HomeFragment();
     FeedFragment feedFragment = new FeedFragment();
@@ -35,6 +43,7 @@ public class Principal extends AppCompatActivity {
         });
 
         bottomNavigation = findViewById(R.id.bottomNavigation);
+        botonFlotante = findViewById(R.id.fabHome);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, homeFragment).commit();
 
@@ -43,12 +52,7 @@ public class Principal extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
 
-                if (id == R.id.casa) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragmentContainer, homeFragment)
-                            .commit();
-                    return true;
-                } else if (id == R.id.feed) {
+                    if (id == R.id.feed) {
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragmentContainer, feedFragment)
                             .commit();
@@ -63,5 +67,43 @@ public class Principal extends AppCompatActivity {
                 return false;
             }
         });
+
+        botonFlotante.setOnClickListener(v -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (!(currentFragment instanceof HomeFragment)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, homeFragment)
+                        .commit();
+            }
+        });
+
+
+        botonFlotante.setOnLongClickListener(v -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+            if (currentFragment instanceof HomeFragment) {
+                vibrarAlCrear();
+                ((HomeFragment) currentFragment).crearBurbuja();
+                return true;
+            }
+            return false;
+        });
+
+
+
+
+
+    }
+    private void vibrarAlCrear() {
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        if (v != null && v.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+                v.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+
+                v.vibrate(50);
+            }
+        }
     }
 }

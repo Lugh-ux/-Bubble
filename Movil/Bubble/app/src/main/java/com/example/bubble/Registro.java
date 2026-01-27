@@ -2,6 +2,8 @@ package com.example.bubble;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -11,6 +13,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class Registro extends AppCompatActivity {
+
+    Button btRegistro;
+    EditText txtUsuario, txtCorreo, txtContraseña, txtConfContraseña;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +34,16 @@ public class Registro extends AppCompatActivity {
             startActivity(new Intent(this, LogIn.class));
 
         });
+
+        btRegistro = findViewById(R.id.btnRegistro);
+        txtUsuario = findViewById(R.id.createBoxUsuario);
+
+        btRegistro.setOnClickListener(v -> {
+            String nombre = txtUsuario.getText().toString();
+            APIRest api = new APIRest();
+            api.subirUsuario(nombre);
+        });
+
 
     }
 }

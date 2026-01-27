@@ -33,7 +33,8 @@ android {
 
 dependencies {
 
-
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
@@ -42,6 +43,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.play.services.maps)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

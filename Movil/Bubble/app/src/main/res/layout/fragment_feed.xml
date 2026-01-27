@@ -5,10 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".FeedFragment">
 
-
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerFeed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="FEED" />
-
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp" />
 </RelativeLayout>
