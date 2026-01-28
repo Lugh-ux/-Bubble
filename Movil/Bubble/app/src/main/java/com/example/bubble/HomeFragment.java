@@ -87,6 +87,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
+        APIRest api = new APIRest();
+        api.cargarBurbujasEnMapa(mMap, getActivity());
     }
 
 
@@ -109,6 +111,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
 
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(miLugar, 16f));
+
+                    APIRest api = new APIRest();
+                    api.subirBurbuja(location.getLatitude(), location.getLongitude());
+
+                    Toast.makeText(getContext(), "Burbuja guardada en el servidor", Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
@@ -153,6 +161,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
     }
+
+
 
 
     @Override
