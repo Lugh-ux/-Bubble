@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -26,17 +27,27 @@ public class LogIn extends AppCompatActivity {
             return insets;
         });
 
-        Button btn = findViewById(R.id.btnLogin);
+        Button btnLogin = findViewById(R.id.btnLogin);
+        EditText txtEmail = findViewById(R.id.loginBoxUsuario);
+        EditText txtContraseña = findViewById(R.id.loginBoxContraseña);
         TextView crear = findViewById(R.id.txtIniciarsesion);
         crear.setOnClickListener(v -> {
             startActivity(new Intent(this, Registro.class));
 
         });
 
-        Button btnEntrar = findViewById(R.id.btnLogin);
-        btnEntrar.setOnClickListener(v -> {
-            startActivity(new Intent(this, Principal.class));
-            finish();
+        APIRest api = new APIRest();
+
+        btnLogin.setOnClickListener(v -> {
+            String email = txtEmail.getText().toString();
+            String pass = txtContraseña.getText().toString();
+
+            if (!email.isEmpty() && !pass.isEmpty()) {
+
+                api.login(email, pass, this);
+            } else {
+                android.widget.Toast.makeText(this, "Rellena todos los campos", android.widget.Toast.LENGTH_SHORT).show();
+            }
         });
 
 
