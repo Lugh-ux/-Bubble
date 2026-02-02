@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,10 +13,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
 public class Registro extends AppCompatActivity {
 
     Button btRegistro;
-    EditText txtUsuario, txtCorreo, txtContraseña, txtConfContraseña;
+    TextInputEditText txtUsuario, txtCorreo, txtContraseña, txtContraseñaConf;
 
 
     @Override
@@ -35,13 +39,33 @@ public class Registro extends AppCompatActivity {
 
         });
 
-        btRegistro = findViewById(R.id.btnRegistro);
         txtUsuario = findViewById(R.id.createBoxUsuario);
+        txtCorreo = findViewById(R.id.createBoxCorreo);
+        txtContraseña = findViewById(R.id.createBoxContraseña);
+        txtContraseñaConf = findViewById(R.id.createBoxConfContraseña);
+        btRegistro = findViewById(R.id.btnRegistro);
+
 
         btRegistro.setOnClickListener(v -> {
-            String nombre = txtUsuario.getText().toString();
-            APIRest api = new APIRest();
-            api.subirUsuario(nombre);
+            String user = txtUsuario.getText().toString().trim();
+            String email = txtCorreo.getText().toString().trim();
+            String pass = txtContraseña.getText().toString().trim();
+            String confirm = txtContraseñaConf.getText().toString().trim();
+
+            if (user.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+                Toast.makeText(this, "Rellena todos los campos", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!pass.equals(confirm)) {
+                Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+
+            } else {
+                APIRest api = new APIRest();
+                api.registrarUsuario(user, email, pass, this);
+            }
+
+
         });
 
 

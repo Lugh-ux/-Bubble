@@ -47,14 +47,15 @@
             android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtUsuario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="#FFFFFF"
             app:boxBackgroundColor="#000000"
-            app:boxStrokeColor="#FFFFFF"
 
-            app:hintTextColor="#FFFFFF"
-            app:cursorColor="#FFFFFF">
+            app:boxStrokeColor="#FFFFFF"
+            app:cursorColor="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
 
             <com.google.android.material.textfield.TextInputEditText
@@ -72,14 +73,15 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtCorreo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="#FFFFFF"
             app:boxBackgroundColor="#000000"
-            app:boxStrokeColor="#FFFFFF"
 
-            app:hintTextColor="#FFFFFF"
-            app:cursorColor="#FFFFFF">
+            app:boxStrokeColor="#FFFFFF"
+            app:cursorColor="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
 
             <com.google.android.material.textfield.TextInputEditText
@@ -97,14 +99,15 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtContraseña"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="#FFFFFF"
             app:boxBackgroundColor="#000000"
             app:boxStrokeColor="#FFFFFF"
-            app:hintTextColor="#FFFFFF"
             app:cursorColor="#FFFFFF"
-            app:endIconMode="password_toggle">
+            app:endIconMode="password_toggle"
+            app:hintTextColor="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/createBoxContraseña"
@@ -118,14 +121,15 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtContraseñaConf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="#FFFFFF"
             app:boxBackgroundColor="#000000"
             app:boxStrokeColor="#FFFFFF"
-            app:hintTextColor="#FFFFFF"
             app:cursorColor="#FFFFFF"
-            app:endIconMode="password_toggle">
+            app:endIconMode="password_toggle"
+            app:hintTextColor="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/createBoxConfContraseña"

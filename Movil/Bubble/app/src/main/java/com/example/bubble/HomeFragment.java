@@ -99,6 +99,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
+                    android.content.SharedPreferences pref = getActivity().getSharedPreferences("Sesion", android.content.Context.MODE_PRIVATE);
+                    long idUsuario = pref.getLong("user_id", -1);
+
+                    if (idUsuario == -1) {
+                        Toast.makeText(getContext(), "Error: Debes iniciar sesión primero", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     LatLng miLugar = new LatLng(location.getLatitude(), location.getLongitude());
 
                     mMap.addCircle(new CircleOptions()
@@ -109,14 +117,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             .fillColor(Color.parseColor("#404285F4"))
                             .zIndex(1));
 
-
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(miLugar, 16f));
 
+
                     APIRest api = new APIRest();
-                    api.subirBurbuja(location.getLatitude(), location.getLongitude(),this.getActivity(),mMap);
+                    api.subirBurbuja(location.getLatitude(), location.getLongitude(), (int)idUsuario, this.getActivity(), mMap);
 
-                    Toast.makeText(getContext(), "Burbuja guardada en el servidor", Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(getContext(), "Burbuja guardada para el usuario ID: " + idUsuario, Toast.LENGTH_SHORT).show();
                 }
             });
         }

@@ -1,5 +1,6 @@
 package com.example.bubble;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -41,6 +42,9 @@ public class Principal extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        SharedPreferences pref = getSharedPreferences("Sesion", MODE_PRIVATE);
+        long idLogueado = pref.getLong("user_id", -1);
 
         bottomNavigation = findViewById(R.id.bottomNavigation);
         botonFlotante = findViewById(R.id.fabHome);
