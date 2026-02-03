@@ -8,20 +8,23 @@ use App\Models\Bubble;
 
 class BubbleController extends Controller
 {
-    public function index(){
-        return response()->json(Bubble::all(), 200);
+    public function index()
+    {
+        $burbujas = \App\Models\Bubble::with('user')->get();
+        return view('muro', compact('burbujas'));
     }
 
-    public function guardar(Request $request){
+    public function guardar(Request $request)
+    {
         $bubble = new Bubble();
-        $bubble -> user_id = 1;
-        $bubble -> latitude = $request -> latitude;
-        $bubble -> longitude = $request -> longitude;
-        $bubble -> save();
+        $bubble->user_id = 1;
+        $bubble->latitude = $request->latitude;
+        $bubble->longitude = $request->longitude;
+        $bubble->save();
 
         return response()->json([
             'message' => 'Burbuja guardada con éxito',
-            'data' => $bubble], 201);    
-        
+            'data' => $bubble
+        ], 201);
     }
 }

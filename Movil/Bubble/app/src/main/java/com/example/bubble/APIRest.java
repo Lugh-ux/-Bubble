@@ -122,10 +122,13 @@ public class APIRest {
                                         .strokeColor(Color.parseColor("#4285F4"))
                                         .fillColor(Color.parseColor("#404285F4")));
 
+
+
                                 mapa.addMarker(new MarkerOptions()
                                         .position(pos)
                                         .title("Burbuja de " + nombreAutor)
-                                        .snippet("Usuario ID: " + obj.getInt("user_id")) 
+                                        .snippet("Usuario ID: " + obj.getInt("user_id"))
+                                        .alpha(0.0f)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                             }
                         } catch (Exception e) {

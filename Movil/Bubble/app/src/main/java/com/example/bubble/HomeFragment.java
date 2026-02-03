@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
+
+    private Runnable refrescoBurbujas;
+
+    private Handler handler = new Handler();
 
     private MapView mapView;
     private GoogleMap mMap;
@@ -89,6 +94,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
         APIRest api = new APIRest();
         api.cargarBurbujasEnMapa(mMap, getActivity());
+
+        refrescoBurbujas = new Runnable() {
+            @Override
+            public void run() {
+                APIRest apiRest = new APIRest();
+                apiRest.cargarBurbujasEnMapa(mMap, getActivity());
+
+                handler.postDelayed(this, 30000);
+            }
+        };
     }
 
 
@@ -191,10 +206,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
-    public void onDestroy() { super.onDestroy(); if (mapView != null) mapView.onDestroy(); }
+    public void onDestroy()
+    {
+        super.onDestroy(); if (mapView != null) mapView.onDestroy();
+    }
 
     @Override
-    public void onLowMemory() { super.onLowMemory(); if (mapView != null) mapView.onLowMemory(); }
+    public void onLowMemory()
+    {
+        super.onLowMemory(); if (mapView != null) mapView.onLowMemory();
+    }
 
 
 }

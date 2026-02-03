@@ -2,6 +2,7 @@ package com.example.bubble;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 
 import androidx.activity.EdgeToEdge;
@@ -30,6 +31,8 @@ public class Principal extends AppCompatActivity {
     HomeFragment homeFragment = new HomeFragment();
     FeedFragment feedFragment = new FeedFragment();
     ProfileFragment profileFragment = new ProfileFragment();
+
+
 
 
     @Override
