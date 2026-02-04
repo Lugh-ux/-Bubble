@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\Bubble;
 use Illuminate\Support\Facades\Hash;
 
 class ControladorRegistro extends Controller
@@ -53,7 +54,7 @@ class ControladorRegistro extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Las credenciales no coinciden con nuestros registros.',
+            'email' => 'Este usuario no se encuentra registrado o la contraseña es incorrecta.',
         ]);
     }
 
@@ -63,4 +64,6 @@ class ControladorRegistro extends Controller
         $request->session()->regenerateToken();
         return redirect('/login');
     }
+
+    
 }

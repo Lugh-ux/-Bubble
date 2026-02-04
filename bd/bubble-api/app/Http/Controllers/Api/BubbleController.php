@@ -27,4 +27,10 @@ class BubbleController extends Controller
             'data' => $bubble
         ], 201);
     }
+
+    public function mostrarMuro() {
+    $burbujas = Bubble::with('user')->latest()->get(); 
+    
+    return view('muro', compact('burbujas'));
+    }
 }
