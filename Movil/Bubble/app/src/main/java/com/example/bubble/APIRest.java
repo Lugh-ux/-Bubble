@@ -1,8 +1,13 @@
 package com.example.bubble;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,8 +20,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -222,4 +229,57 @@ public class APIRest {
         }).start();
     }
 
+    public void subirImagen(Uri imageUri, Context context, String nombre) {
+        new Thread(() -> {
+            try {
+                // 1. Leer y comprimir la imagen
+                InputStream is = context.getContentResolver().openInputStream(imageUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+                // Redimensionamos a un tamaño razonable (ej. 500px) para perfil
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, 500, 500, true);
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // Comprimimos como JPEG al 80% de calidad
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                byte[] imagenBytes = baos.toByteArray();
+                is.close();
+
+                // 2. Convertir a Base64 (usando tus bytes comprimidos)
+                String base64Imagen = Base64.encodeToString(imagenBytes, Base64.NO_WRAP);
+
+                // 3. Crear JSON
+                JSONObject json = new JSONObject();
+                json.put("nombre", nombre);
+                json.put("imagen", base64Imagen);
+
+                // 4. Conexión HTTP (Tu IP actual)
+                URL url = new URL("http://172.16.0.79:8080/tema5maven/rest/burbujas/imagen");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                con.setDoInput(true);
+                con.setConnectTimeout(15000);
+                con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                // Enviar JSON
+                try (OutputStream os = con.getOutputStream()) {
+                    byte[] input = json.toString().getBytes(StandardCharsets.UTF_8);
+                    os.write(input);
+                    os.flush();
+                }
+
+                // 5. Leer respuesta
+                int code = con.getResponseCode();
+                Log.i("API", "Código respuesta: " + code);
+
+                if (code == 200) {
+                    Log.d("API", " Imagen subida correctamente");
+                }
+
+            } catch (Exception e) {
+                Log.e("UPLOAD", " Error al subir imagen", e);
+            }
+        }).start();
+    }
 }

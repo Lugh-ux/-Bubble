@@ -143,40 +143,38 @@
             console.log("Pintando burbujas con nombres corregidos...");
 
             @foreach ($burbujas as $burbuja)
-                @if ($burbuja->latitude && $burbuja->longitude)
-                    (function() {
-                        const burbujaPos = {
-                            lat: parseFloat("{{ $burbuja->latitude }}"),
-                            lng: parseFloat("{{ $burbuja->longitude }}")
-                        };
+    @if ($burbuja->latitude && $burbuja->longitude)
+        (function() {
+            const burbujaPos = { 
+                lat: parseFloat("{{ $burbuja->latitude }}"), 
+                lng: parseFloat("{{ $burbuja->longitude }}") 
+            };
 
-                        const mkr = new google.maps.Marker({
-                            position: burbujaPos,
-                            map: map,
-                            title: "{{ $burbuja->user->name ?? 'Usuario' }}",
-                            animation: google.maps.Animation.DROP,
-                            icon: {
-                                url: "https://maps.google.com/mapfiles/kml/paddle/blu-blank-lv.png",
-                                scaledSize: new google.maps.Size(40, 40), // Tamaño de la burbuja
-                                origin: new google.maps.Point(0, 0),
-                                anchor: new google.maps.Point(20, 40)
-                            }
-                        });
+            const circuloBurbuja = new google.maps.Circle({
+                strokeColor: "#3498db",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#3498db",
+                fillOpacity: 0.35,
+                map: map,
+                center: burbujaPos,
+                radius: 50 
+            });
 
-                        const iw = new google.maps.InfoWindow({
-                            content: `
-                    <div style="color:black; padding:5px;">
-                        <strong>{{ $burbuja->user->name ?? 'Anónimo' }}</strong><br>
-                        {{ $burbuja->mensaje }}
-                    </div>`
-                        });
+            const iw = new google.maps.InfoWindow({
+                content: `<div style="color:black; padding:5px;">
+                            <strong>{{ $burbuja->user->name ?? 'Anónimo' }}</strong><br>
+                            {{ $burbuja->mensaje }}
+                          </div>`,
+                position: burbujaPos
+            });
 
-                        mkr.addListener("click", () => {
-                            iw.open(map, mkr);
-                        });
-                    })();
-                @endif
-            @endforeach
+            circuloBurbuja.addListener("click", () => {
+                iw.open(map);
+            });
+        })(); 
+    @endif
+@endforeach
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
