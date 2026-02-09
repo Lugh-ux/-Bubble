@@ -24,4 +24,6 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/', function () { return redirect()->route('login'); });
 
+Route::patch('/perfil/update', [BubbleController::class, 'updatePerfil'])->name('perfil.update');
+
 

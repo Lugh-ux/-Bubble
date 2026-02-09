@@ -2,7 +2,9 @@ package com.example.bubble;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -39,8 +41,16 @@ public class ProfileFragment extends Fragment {
                     startActivityForResult(intent, 101);
                 }
             }
+
+
         });
 
+        APIRest api = new APIRest();
+
+        SharedPreferences pref = getActivity().getSharedPreferences("Sesion", Context.MODE_PRIVATE);
+        String nombreUsuario = pref.getString("username", "Prueba");
+
+        api.descargarImagen(nombreUsuario, imagenPerfil);
 
 
         return view;
@@ -52,8 +62,13 @@ public class ProfileFragment extends Fragment {
         if (requestCode == 101 && resultCode == android.app.Activity.RESULT_OK && data != null) {
             android.net.Uri imageUri = data.getData();
 
+            android.content.SharedPreferences pref = getActivity().getSharedPreferences("Sesion", android.content.Context.MODE_PRIVATE);
+            String nombreUsuario = pref.getString("username", "UsuarioDesconocido");
+
 
             imagenPerfil.setImageURI(imageUri);
+            APIRest api = new APIRest();
+            api.subirImagen(imageUri, getContext(), nombreUsuario);
         }
     }
 

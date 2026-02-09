@@ -109,18 +109,31 @@
         </main>
 
         <aside class="panel">
-            <div class="profile-info">
-                <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=3b4cca&color=fff"
-                    alt="Avatar">
-                <h3>{{ Auth::user()->name }}</h3>
-                <p style="color: #666; font-size: 14px;">{{ Auth::user()->email }}</p>
-                <hr>
-                <div style="text-align: left;">
-                    <p><i class="fas fa-comment-dots"></i> Burbujas: 12</p>
-                    <p><i class="fas fa-users"></i> Amigos: 45</p>
-                </div>
-            </div>
-        </aside>
+    <div class="profile-info">
+        <div style="position: relative; display: inline-block;">
+            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . Auth::user()->name . '&background=3b4cca&color=fff' }}" 
+                 alt="Avatar" id="avatarPreview" style="cursor: pointer; object-fit: cover;">
+            
+            <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data" id="formAvatar">
+                @csrf
+                @method('PATCH')
+                <input type="file" name="caratula" id="inputAvatar" style="display:none;" accept="image/*" onchange="document.getElementById('formAvatar').submit();">
+                <label for="inputAvatar" style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc;">
+                    <i class="fas fa-camera" style="color: #3b4cca; font-size: 14px;"></i>
+                </label>
+            </form>
+        </div>
+
+        <h3>{{ Auth::user()->name }}</h3>
+        <p style="color: #666; font-size: 14px;">{{ Auth::user()->email }}</p>
+        
+        <hr>
+        <div style="text-align: left;">
+            <p><i class="fas fa-comment-dots" style="color: #3b4cca;"></i> Burbujas: {{ count($burbujas->where('user_id', Auth::id())) }}</p>
+            <p><i class="fas fa-users" style="color: #3b4cca;"></i> Amigos: 45</p>
+        </div>
+    </div>
+</aside>
     </div>
 
     <script>
@@ -133,63 +146,94 @@
             };
 
             map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 14,
+                zoom: 17,
                 center: centro,
-                disableDefaultUI: true,
-
+                tilt: 45,
+                heading: 0,
+                mapTypeId: 'roadmap',
+                gestureHandling: "greedy",
+                tiltControl: true,
+                rotateControl: true
             });
+
+            const iconoNavegacion = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                scale: 6,
+                fillColor: "#e74c3c",
+                fillOpacity: 1,
+                strokeWeight: 2,
+                strokeColor: "#ffffff",
+                rotation: 0
+            };
 
             console.log("Mapa cargado. Empezando a pintar burbujas...");
             console.log("Pintando burbujas con nombres corregidos...");
 
             @foreach ($burbujas as $burbuja)
-    @if ($burbuja->latitude && $burbuja->longitude)
-        (function() {
-            const burbujaPos = { 
-                lat: parseFloat("{{ $burbuja->latitude }}"), 
-                lng: parseFloat("{{ $burbuja->longitude }}") 
-            };
+                @if ($burbuja->latitude && $burbuja->longitude)
+                    (function() {
+                        const burbujaPos = {
+                            lat: parseFloat("{{ $burbuja->latitude }}"),
+                            lng: parseFloat("{{ $burbuja->longitude }}")
+                        };
 
-            const circuloBurbuja = new google.maps.Circle({
-                strokeColor: "#3498db",
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: "#3498db",
-                fillOpacity: 0.35,
-                map: map,
-                center: burbujaPos,
-                radius: 50 
-            });
+                        const circuloBurbuja = new google.maps.Circle({
+                            strokeColor: "#3498db",
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: "#3498db",
+                            fillOpacity: 0.35,
+                            map: map,
+                            center: burbujaPos,
+                            radius: 50
+                        });
 
-            const iw = new google.maps.InfoWindow({
-                content: `<div style="color:black; padding:5px;">
+                        const iw = new google.maps.InfoWindow({
+                            content: `<div style="color:black; padding:5px;">
                             <strong>{{ $burbuja->user->name ?? 'Anónimo' }}</strong><br>
                             {{ $burbuja->mensaje }}
                           </div>`,
-                position: burbujaPos
-            });
+                            position: burbujaPos
+                        });
 
-            circuloBurbuja.addListener("click", () => {
-                iw.open(map);
-            });
-        })(); 
-    @endif
-@endforeach
+                        circuloBurbuja.addListener("click", () => {
+                            iw.open(map);
+                        });
+                    })();
+                @endif
+            @endforeach
 
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
+                navigator.geolocation.watchPosition((position) => {
                     const miPos = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     };
+
+                    const rumbo = position.coords.heading || 0;
+
                     map.setCenter(miPos);
-                    new google.maps.Marker({
-                        position: miPos,
-                        map: map,
-                        title: "Tú estás aquí"
-                    });
-                }, () => {
-                    console.warn("El usuario denegó el GPS.");
+                    map.setTilt(45); 
+                    map.setHeading(rumbo); 
+
+                    if (window.miMarcador) {
+                        window.miMarcador.setPosition(miPos);
+                        iconoNavegacion.rotation = rumbo;
+                        window.miMarcador.setIcon(iconoNavegacion);
+                    } else {
+                        iconoNavegacion.rotation = rumbo;
+                        window.miMarcador = new google.maps.Marker({
+                            position: miPos,
+                            map: map,
+                            icon: iconoNavegacion,
+                            title: "Tu dirección"
+                        });
+                    }
+                }, (error) => {
+                    console.warn("Error de GPS: ", error);
+                }, {
+                    enableHighAccuracy: true, 
+                    maximumAge: 1000
                 });
             }
         }

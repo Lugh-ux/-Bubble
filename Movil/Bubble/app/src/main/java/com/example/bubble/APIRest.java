@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -20,10 +21,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -169,14 +172,17 @@ public class APIRest {
                 int code = con.getResponseCode();
                 System.out.println(code);
                 if (code == 200) {
-
                     java.util.Scanner s = new java.util.Scanner(con.getInputStream()).useDelimiter("\\A");
                     JSONObject response = new JSONObject(s.hasNext() ? s.next() : "");
-                    long idUsuario = response.getLong("id");
 
+                    long idUsuario = response.getLong("id");
+                    String nombreUsuario = response.getString("name");
 
                     android.content.SharedPreferences pref = actividad.getSharedPreferences("Sesion", android.content.Context.MODE_PRIVATE);
-                    pref.edit().putLong("user_id", idUsuario).apply();
+                    android.content.SharedPreferences.Editor editor = pref.edit();
+                    editor.putLong("user_id", idUsuario);
+                    editor.putString("username", nombreUsuario);
+                    editor.apply();
 
                     actividad.runOnUiThread(() -> {
                         actividad.startActivity(new Intent(actividad, Principal.class));
@@ -254,7 +260,7 @@ public class APIRest {
                 json.put("imagen", base64Imagen);
 
                 // 4. Conexión HTTP (Tu IP actual)
-                URL url = new URL("http://172.16.0.79:8080/tema5maven/rest/burbujas/imagen");
+                URL url = new URL("http://10.0.2.2:8080/tema5maven/rest/burbujas/imagen");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setDoOutput(true);
@@ -267,6 +273,11 @@ public class APIRest {
                     byte[] input = json.toString().getBytes(StandardCharsets.UTF_8);
                     os.write(input);
                     os.flush();
+
+                    Log.d("URL_CHECK", "Llamando a: " + url.toString());
+                    Log.d("DEBUG_API", "Enviando a: " + url.toString());
+                    Log.d("DEBUG_API", "Usuario: " + nombre);
+                    Log.d("DEBUG_API", "Tamaño Base64: " + base64Imagen.length());
                 }
 
                 // 5. Leer respuesta
@@ -282,4 +293,54 @@ public class APIRest {
             }
         }).start();
     }
+
+    public void descargarImagen(String nombre, ImageView imageView) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:8080/tema5maven/rest/burbujas/descargarImagen/" + nombre);
+
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+
+                int code = conn.getResponseCode();
+                Log.i("API", "Código HTTP descarga: " + code);
+
+                if (code == 200) {
+                    InputStream stream = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line.trim());
+                    }
+
+                    JSONObject obj = new JSONObject(response.toString());
+                    String base64Imagen = obj.getString("imagen");
+
+                    byte[] decodedString = android.util.Base64.decode(base64Imagen, android.util.Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        if (bitmap != null) {
+                            imageView.setImageBitmap(bitmap);
+                            Log.d("API", "Imagen cargada visualmente para: " + nombre);
+                        }
+                    });
+
+                    reader.close();
+                    stream.close();
+                } else {
+                    Log.e("API", "Error: El servidor respondió con código " + code);
+                }
+
+            } catch (Exception e) {
+                Log.e("Error", "Error al descargar la imagen de perfil");
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+
 }
