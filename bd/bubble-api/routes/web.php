@@ -26,4 +26,8 @@ Route::get('/', function () { return redirect()->route('login'); });
 
 Route::patch('/perfil/update', [BubbleController::class, 'updatePerfil'])->name('perfil.update');
 
+Route::post('/burbuja', [BubbleController::class, 'crearBurbuja'])->name('burbuja.crearBurbuja');
+Route::delete('/burbuja', [BubbleController::class, 'eliminarBurbuja'])->name('burbuja.eliminarBurbuja');
+
+Route::get('/api/notificaciones', [BubbleController::class, 'getNotificacionesAjax'])->name('notificaciones.ajax');
 

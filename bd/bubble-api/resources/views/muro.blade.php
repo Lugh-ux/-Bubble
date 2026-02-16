@@ -6,12 +6,13 @@
     <title>Buble - Mapa de Proximidad</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Roboto Mono', monospace;
             background-color: #131313;
             background-image: url('https://freight.cargo.site/t/original/i/ead9616a26eff00700fd6053e96fd614141f6c9a5ec9ea6080d0fc9a726119d7/swirls-1.gif');
             background-size: cover;
@@ -38,6 +39,69 @@
             overflow-y: auto;
         }
 
+
+        .panel h3 {
+            margin-top: 0;
+            color: #050505;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ESTILOS DE NOTIFICACIONES PULIDOS */
+        .notif-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-family: 'Roboto Mono', monospace;
+            transition: background 0.3s;
+        }
+
+        .notif-item:hover {
+            background: rgba(59, 76, 202, 0.05);
+        }
+
+        .notif-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #3b4cca;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .notif-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .notif-user {
+            font-weight: bold;
+            color: #131313;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notif-text {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .notif-distance {
+            font-size: 11px;
+            color: #2ecc71;
+            /* Verde radar */
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
         #map {
             width: 100%;
             height: 100%;
@@ -46,29 +110,24 @@
             box-sizing: border-box;
         }
 
-        .panel h3 {
-            margin-top: 0;
-            color: #000000;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .notif-item {
-            padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
         .profile-info {
             text-align: center;
         }
 
-        .profile-info img {
+        .profile-info h3 {
+            margin: 15px 0 5px 0;
+            font-size: 22px;
+            color: #131313;
+            border: none;
+        }
+
+        .profile-info img#avatarPreview {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            border: 3px solid #3b4cca;
+            border: 3px solid #050505;
         }
+
 
         .navbar {
             background: white;
@@ -81,15 +140,98 @@
 
         .navbar .logo {
             font-weight: bold;
-            color: #000000;
+            color: #131313;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-size: 26px;
+        }
+
+        .navbar .logo img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+
+        .logo-switch-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-toggle {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .logo-toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            margin: 0;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            display: block;
+            width: 80px;
+            height: 80px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%) opacity(0.3);
+            transition: all 0.4s ease;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 16px;
+            height: 16px;
+            background-color: #ff4d4d;
+            border: 3px solid white;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.4s ease;
+        }
+
+        .logo-toggle input:checked+.logo-wrapper .logo-img {
+            filter: grayscale(0%) opacity(1) drop-shadow(0 0 10px rgba(8, 8, 8, 0.5));
+            transform: scale(1.1);
+        }
+
+        .logo-toggle input:checked+.logo-wrapper .status-dot {
+            background-color: #2ecc71;
+            box-shadow: 0 0 12px #2ecc71;
+        }
+
+
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
+
+    <div id="loader"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #131313; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease;">
+        <img src="{{ asset('img/logo.gif') }}" width="80" style="margin-bottom: 20px;">
+        <div class="spinner"></div>
+        <p style="color: white; margin-top: 15px; font-family: Arial;">Localizando burbujas...</p>
+    </div>
 
     <nav class="navbar">
         <div class="logo"><img src="{{ asset('img/logo.gif') }}" width="40"> Bubble</div>
@@ -98,10 +240,29 @@
 
     <div class="main-layout">
         <aside class="panel">
-            <h3><i class="fas fa-bell"></i> Entorno</h3>
-            <div class="notif-item"> <b>Iker</b> Burbuja nueva</div>
-            <div class="notif-item"> <b>Test</b>Esta cerca</div>
-            <div class="notif-item"> Notificacion de prueba</div>
+            <h3><i class="fas fa-satellite-dish"></i> Radar</h3>
+            <div id="contenedor-notificaciones">
+                @foreach ($burbujas as $burbuja)
+                    <div class="notif-item">
+                        <img src="{{ $burbuja->user->avatar ? asset('storage/' . $burbuja->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($burbuja->user->name) . '&background=3b4cca&color=fff' }}"
+                            class="notif-avatar">
+
+                        <div class="notif-content">
+                            <span class="notif-user">{{ $burbuja->user->name }}</span>
+                            <span class="notif-text">Burbuja activa</span>
+
+                            <span class="notif-distance">
+                                <i class="fas fa-map-marker-alt"></i>
+                                @if ($burbuja->distance < 1)
+                                    {{ round($burbuja->distance * 1000) }}m
+                                @else
+                                    {{ number_format($burbuja->distance, 1) }}km
+                                @endif
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </aside>
 
         <main style="position: relative;">
@@ -109,51 +270,70 @@
         </main>
 
         <aside class="panel">
-    <div class="profile-info">
-        <div style="position: relative; display: inline-block;">
-            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . Auth::user()->name . '&background=3b4cca&color=fff' }}" 
-                 alt="Avatar" id="avatarPreview" style="cursor: pointer; object-fit: cover;">
-            
-            <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data" id="formAvatar">
-                @csrf
-                @method('PATCH')
-                <input type="file" name="caratula" id="inputAvatar" style="display:none;" accept="image/*" onchange="document.getElementById('formAvatar').submit();">
-                <label for="inputAvatar" style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc;">
-                    <i class="fas fa-camera" style="color: #3b4cca; font-size: 14px;"></i>
-                </label>
-            </form>
-        </div>
+            <div class="profile-info">
+                <div style="position: relative; display: inline-block;">
+                    <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . Auth::user()->name . '&background=3b4cca&color=fff' }}"
+                        alt="Avatar" id="avatarPreview" style="cursor: pointer; object-fit: cover;">
 
-        <h3>{{ Auth::user()->name }}</h3>
-        <p style="color: #666; font-size: 14px;">{{ Auth::user()->email }}</p>
-        
-        <hr>
-        <div style="text-align: left;">
-            <p><i class="fas fa-comment-dots" style="color: #3b4cca;"></i> Burbujas: {{ count($burbujas->where('user_id', Auth::id())) }}</p>
-            <p><i class="fas fa-users" style="color: #3b4cca;"></i> Amigos: 45</p>
-        </div>
-    </div>
-</aside>
+                    <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data"
+                        id="formAvatar">
+                        @csrf
+                        @method('PATCH')
+                        <input type="file" name="caratula" id="inputAvatar" style="display:none;" accept="image/*"
+                            onchange="this.form.submit();">
+                        <label for="inputAvatar"
+                            style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc;">
+                            <i class="fas fa-camera" style="color: #3b4cca; font-size: 14px;"></i>
+                        </label>
+                    </form>
+                </div>
+
+                <h3>{{ Auth::user()->name }}</h3>
+
+                <div class="logo-switch-container">
+                    <label class="logo-toggle">
+                        @php
+                            $miBurbujaActiva = \App\Models\Bubble::where('user_id', auth()->id())->exists();
+                        @endphp
+
+                        <input type="checkbox" id="btnToggleBurbuja" onchange="gestionarBurbuja(this)"
+                            {{ $miBurbujaActiva ? 'checked' : '' }}>
+
+                        <div class="logo-wrapper">
+                            <img src="{{ asset('img/logo.gif') }}" class="logo-img">
+                            <div class="status-dot"></div>
+                        </div>
+                    </label>
+                </div>
+
+                <form id="formBurbujaToggle" action="" method="POST" style="display: none;">
+                    @csrf
+                    <input type="hidden" name="_method" id="metodo_burbuja" value="POST">
+                    <input type="hidden" name="lat" id="lat_input_switch">
+                    <input type="hidden" name="lng" id="lng_input_switch">
+                </form>
+            </div>
+        </aside>
     </div>
 
     <script>
         let map;
+        let miLatActual = null;
+        let miLngActual = null;
+        let mapaCentrado = false;
 
         function initMap() {
             const centro = {
                 lat: 40.4167,
                 lng: -3.7037
             };
-
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 17,
                 center: centro,
                 tilt: 45,
                 heading: 0,
                 mapTypeId: 'roadmap',
-                gestureHandling: "greedy",
-                tiltControl: true,
-                rotateControl: true
+                gestureHandling: "greedy"
             });
 
             const iconoNavegacion = {
@@ -166,9 +346,6 @@
                 rotation: 0
             };
 
-            console.log("Mapa cargado. Empezando a pintar burbujas...");
-            console.log("Pintando burbujas con nombres corregidos...");
-
             @foreach ($burbujas as $burbuja)
                 @if ($burbuja->latitude && $burbuja->longitude)
                     (function() {
@@ -176,8 +353,7 @@
                             lat: parseFloat("{{ $burbuja->latitude }}"),
                             lng: parseFloat("{{ $burbuja->longitude }}")
                         };
-
-                        const circuloBurbuja = new google.maps.Circle({
+                        new google.maps.Circle({
                             strokeColor: "#3498db",
                             strokeOpacity: 0.8,
                             strokeWeight: 2,
@@ -187,61 +363,70 @@
                             center: burbujaPos,
                             radius: 50
                         });
-
-                        const iw = new google.maps.InfoWindow({
-                            content: `<div style="color:black; padding:5px;">
-                            <strong>{{ $burbuja->user->name ?? 'Anónimo' }}</strong><br>
-                            {{ $burbuja->mensaje }}
-                          </div>`,
-                            position: burbujaPos
-                        });
-
-                        circuloBurbuja.addListener("click", () => {
-                            iw.open(map);
-                        });
                     })();
                 @endif
             @endforeach
 
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    miLatActual = position.coords.latitude;
+                    miLngActual = position.coords.longitude;
                     const miPos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
+                        lat: miLatActual,
+                        lng: miLngActual
                     };
 
-                    const rumbo = position.coords.heading || 0;
-
-                    map.setCenter(miPos);
-                    map.setTilt(45); 
-                    map.setHeading(rumbo); 
+                    if (!mapaCentrado) {
+                        map.setCenter(miPos);
+                        mapaCentrado = true;
+                        document.getElementById('loader').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loader').style.display = 'none';
+                        }, 500);
+                    }
 
                     if (window.miMarcador) {
                         window.miMarcador.setPosition(miPos);
-                        iconoNavegacion.rotation = rumbo;
-                        window.miMarcador.setIcon(iconoNavegacion);
                     } else {
-                        iconoNavegacion.rotation = rumbo;
                         window.miMarcador = new google.maps.Marker({
                             position: miPos,
                             map: map,
-                            icon: iconoNavegacion,
-                            title: "Tu dirección"
+                            icon: iconoNavegacion
                         });
                     }
-                }, (error) => {
-                    console.warn("Error de GPS: ", error);
-                }, {
-                    enableHighAccuracy: true, 
-                    maximumAge: 1000
+                }, null, {
+                    enableHighAccuracy: true
                 });
             }
         }
-    </script>
 
+        function gestionarBurbuja(checkbox) {
+            const form = document.getElementById('formBurbujaToggle');
+            const metodo = document.getElementById('metodo_burbuja');
+
+            if (checkbox.checked) {
+                if (miLatActual !== null) {
+                    form.action = "{{ route('burbuja.crearBurbuja') }}";
+                    metodo.value = "POST";
+                    document.getElementById('lat_input_switch').value = miLatActual;
+                    document.getElementById('lng_input_switch').value = miLngActual;
+                    form.submit();
+                } else {
+                    alert("GPS no listo.");
+                    checkbox.checked = false;
+                }
+            } else {
+                form.action = "{{ route('burbuja.eliminarBurbuja') }}";
+                metodo.value = "DELETE";
+                form.submit();
+            }
+        }
+    </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrNWfOEQS3UZ6-7wEQHLv40__DLg5BF6E&callback=initMap" async
         defer></script>
-
 </body>
 
 </html>

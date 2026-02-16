@@ -11,11 +11,21 @@ use Illuminate\Support\Facades\Auth;
 
 class BubbleController extends Controller
 {
-    public function index()
-    {
-        $burbujas = \App\Models\Bubble::with('user')->get();
-        return view('muro', compact('burbujas'));
-    }
+    public function index(Request $request)
+{
+    
+    $latUsuario = $request->get('lat', 0);
+    $lngUsuario = $request->get('lng', 0);
+
+    $burbujas = \App\Models\Bubble::with('user')
+        ->selectRaw("*, 
+            (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance", 
+            [$latUsuario, $lngUsuario, $latUsuario])
+        ->orderBy('distance', 'asc')
+        ->get();
+
+    return view('tu_vista', compact('burbujas'));
+}
 
     public function guardar(Request $request)
     {
@@ -41,30 +51,79 @@ class BubbleController extends Controller
     public function updatePerfil(Request $request)
     {
         $request->validate([
-            'foto' => 'required|image|mimes:png,jpg|max:5000'
+            'caratula' => 'required|image|mimes:png,jpg|max:5000'
         ]);
 
-        $usuario = User::find(Auth::id());
+        $usuario = Auth::user();
 
-        if (!$usuario) {
-            
-            return redirect()->back()->with('error', 'Usuario no autenticado.');
-        }
-
-        if ($request->hasFile('foto')) {
-            $file = $request->file('foto');
-
-            $rutaImagen = $file->store('avatars', ['disk' => 'public']);
+        if ($request->hasFile('caratula')) {
+            $file = $request->file('caratula');
+            $rutaImagen = $file->store('caratulas', ['disk' => 'public']);
 
             if ($usuario->avatar) {
                 Storage::disk('public')->delete($usuario->avatar);
             }
 
             $usuario->avatar = $rutaImagen;
-
             $usuario->save();
         }
 
-        return redirect()->back()->with('success', 'Foto de perfil actualizada.');
+        return redirect()->back()->with('success', 'Foto actualizada');
     }
+
+    public function crearBurbuja(Request $request)
+    {
+        try {
+            $request->validate([
+                'lat' => 'required',
+                'lng' => 'required'
+            ]);
+
+            \App\Models\Bubble::where('user_id', auth()->id())->delete();
+
+            \App\Models\Bubble::create([
+                'user_id'   => auth()->id(),
+                'mensaje'   => "¡Burbuja activa!",
+                'latitude'  => $request->lat,
+                'longitude' => $request->lng,
+            ]);
+
+            return redirect()->back()->with('success', 'Burbuja actualizada.');
+        } catch (\Exception $e) {
+            dd("Error al crear burbuja: " . $e->getMessage());
+        }
+    }
+
+    public function eliminarBurbuja()
+    {
+        Bubble::where('user_id', Auth::id())->delete();
+        return redirect()->back()->with('success', 'Burbuja eliminada.');
+    }
+
+    public function getNotificacionesAjax(Request $request) {
+    $lat = $request->lat;
+    $lng = $request->lng;
+
+    $burbujas = \App\Models\Bubble::with('user')
+        ->selectRaw("*, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance", [$lat, $lng, $lat])
+        ->orderBy('distance', 'asc')
+        ->get();
+
+    $html = "";
+    foreach($burbujas as $b) {
+        $avatar = $b->user->avatar ? asset('storage/' . $b->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($b->user->name) . '&background=3b4cca&color=fff';
+        $distancia = $b->distance < 1 ? round($b->distance * 1000) . "m" : number_format($b->distance, 1) . "km";
+        
+        $html .= "
+        <div class='notif-item'>
+            <img src='{$avatar}' class='notif-avatar'>
+            <div class='notif-content'>
+                <span class='notif-user'>{$b->user->name}</span>
+                <span class='notif-text'>Burbuja detectada</span>
+                <span class='notif-distance'><i class='fas fa-location-arrow'></i> {$distancia}</span>
+            </div>
+        </div>";
+    }
+    return response($html);
+}
 }
