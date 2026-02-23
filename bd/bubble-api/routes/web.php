@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BubbleController;
 use App\Http\Controllers\Api\ControladorRegistro;
+use App\Http\Controllers\ProfileController;
 
 
 Route::get('/', function () {
@@ -31,3 +32,11 @@ Route::delete('/burbuja', [BubbleController::class, 'eliminarBurbuja'])->name('b
 
 Route::get('/api/notificaciones', [BubbleController::class, 'getNotificacionesAjax'])->name('notificaciones.ajax');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+    
+    Route::patch('/perfil', function(\Illuminate\Http\Request $request) {
+    dd('¡BINGO! HE LLEGADO A LA RUTA. Datos enviados:', $request->all());
+})->name('perfil.update');
+});
+Route::post('/guardar-mi-perfil-nuevo', [App\Http\Controllers\ProfileController::class, 'update']);

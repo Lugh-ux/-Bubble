@@ -1,6 +1,7 @@
 package com.example.bubble;
 
 import android.content.Intent;
+import org.mindrot.jbcrypt.BCrypt;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -59,10 +60,14 @@ public class Registro extends AppCompatActivity {
 
             if (!pass.equals(confirm)) {
                 Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
-
             } else {
+
+                String passHasheada = BCrypt.hashpw(pass, BCrypt.gensalt(10));
+
+                passHasheada = passHasheada.replaceFirst("^\\$2a\\$", "\\$2y\\$");
+
                 APIRest api = new APIRest();
-                api.registrarUsuario(user, email, pass, this);
+                api.registrarUsuario(user, email, passHasheada, this);
             }
 
 

@@ -6,21 +6,9 @@ public class Actividad {
     private String distancia;
     private int imagenPerfil;
 
-    public String getNombreUsuario() {
-        return nombreUsuario;
-    }
 
-    public String getAccion() {
-        return accion;
-    }
+    public Actividad() {}
 
-    public String getDistancia() {
-        return distancia;
-    }
-
-    public int getImagenPerfil() {
-        return imagenPerfil;
-    }
 
     public Actividad(String nombreUsuario, String accion, String distancia, int imagenPerfil) {
         this.nombreUsuario = nombreUsuario;
@@ -29,4 +17,9 @@ public class Actividad {
         this.imagenPerfil = imagenPerfil;
     }
 
+    // Getters
+    public String getNombreUsuario() { return nombreUsuario; }
+    public String getAccion() { return accion; }
+    public String getDistancia() { return distancia; }
+    public int getImagenPerfil() { return imagenPerfil; }
 }

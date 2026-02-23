@@ -32,7 +32,7 @@ android {
 }
 
 dependencies {
-
+    implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.google.android.material:material:1.9.0")
 
     implementation("com.google.android.gms:play-services-maps:18.2.0")

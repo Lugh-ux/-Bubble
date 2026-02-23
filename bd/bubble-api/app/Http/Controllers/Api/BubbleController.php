@@ -12,20 +12,22 @@ use Illuminate\Support\Facades\Auth;
 class BubbleController extends Controller
 {
     public function index(Request $request)
-{
-    
-    $latUsuario = $request->get('lat', 0);
-    $lngUsuario = $request->get('lng', 0);
+    {
 
-    $burbujas = \App\Models\Bubble::with('user')
-        ->selectRaw("*, 
-            (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance", 
-            [$latUsuario, $lngUsuario, $latUsuario])
-        ->orderBy('distance', 'asc')
-        ->get();
+        $latUsuario = $request->get('lat', 0);
+        $lngUsuario = $request->get('lng', 0);
 
-    return view('tu_vista', compact('burbujas'));
-}
+        $burbujas = \App\Models\Bubble::with('user')
+            ->selectRaw(
+                "*, 
+            (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
+                [$latUsuario, $lngUsuario, $latUsuario]
+            )
+            ->orderBy('distance', 'asc')
+            ->get();
+
+        return view('tu_vista', compact('burbujas'));
+    }
 
     public function guardar(Request $request)
     {
@@ -100,30 +102,72 @@ class BubbleController extends Controller
         return redirect()->back()->with('success', 'Burbuja eliminada.');
     }
 
-    public function getNotificacionesAjax(Request $request) {
-    $lat = $request->lat;
-    $lng = $request->lng;
+    public function getNotificacionesAjax(Request $request)
+{
+    if (ob_get_length()) ob_clean();
+
+    $latRaw = $request->input('lat', '0');
+    $lngRaw = $request->input('lng', '0');
+    
+    $lat = (float) str_replace(',', '.', $latRaw);
+    $lng = (float) str_replace(',', '.', $lngRaw);
 
     $burbujas = \App\Models\Bubble::with('user')
-        ->selectRaw("*, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance", [$lat, $lng, $lat])
+        ->where('user_id', '!=', auth()->id()) 
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->selectRaw("*, (
+            6371 * acos(
+                cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + 
+                sin(radians(?)) * sin(radians(latitude))
+            )
+        ) AS distance", [$lat, $lng, $lat])
         ->orderBy('distance', 'asc')
+        ->take(20)
         ->get();
 
     $html = "";
-    foreach($burbujas as $b) {
-        $avatar = $b->user->avatar ? asset('storage/' . $b->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($b->user->name) . '&background=3b4cca&color=fff';
-        $distancia = $b->distance < 1 ? round($b->distance * 1000) . "m" : number_format($b->distance, 1) . "km";
-        
-        $html .= "
-        <div class='notif-item'>
-            <img src='{$avatar}' class='notif-avatar'>
-            <div class='notif-content'>
-                <span class='notif-user'>{$b->user->name}</span>
-                <span class='notif-text'>Burbuja detectada</span>
-                <span class='notif-distance'><i class='fas fa-location-arrow'></i> {$distancia}</span>
-            </div>
-        </div>";
+    
+
+    if ($burbujas->isEmpty()) {
+        $html = "<div class='notif-item' style='justify-content:center; color:#999; padding:20px;'>
+                    <i class='fas fa-wind'></i> No hay burbujas cerca
+                 </div>";
+    } else {
+        foreach ($burbujas as $b) {
+            
+            $nombreAvatar = $b->user->avatar;
+            
+            
+            if (strlen($nombreAvatar) > 250) {
+                $nombreAvatar = null; 
+            }
+            
+            $avatar = $nombreAvatar 
+                ? asset('storage/' . $nombreAvatar) 
+                : 'https://ui-avatars.com/api/?name=' . urlencode($b->user->name) . '&background=3b4cca&color=fff';
+            
+
+            if ($b->distance < 1) {
+                $distancia = round($b->distance * 1000) . " m";
+            } else {
+                $distancia = number_format($b->distance, 1) . " km";
+            }
+
+            $html .= "
+            <div class='notif-item'>
+                <img src='{$avatar}' class='notif-avatar' alt='user'>
+                <div class='notif-content'>
+                    <span class='notif-user'>{$b->user->name}</span>
+                    <span class='notif-text'>Burbuja activa</span>
+                    <span class='notif-distance'><i class='fas fa-location-arrow'></i> {$distancia}</span>
+                </div>
+            </div>";
+        }
     }
-    return response($html);
+    
+    
+
+    return response($html)->header('Content-Type', 'text/html');
 }
 }

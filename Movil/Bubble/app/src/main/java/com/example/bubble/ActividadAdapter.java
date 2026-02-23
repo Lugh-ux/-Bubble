@@ -30,7 +30,7 @@ public class ActividadAdapter extends RecyclerView.Adapter<ActividadAdapter.View
         holder.txtUsuario.setText(act.getNombreUsuario());
         holder.txtAccion.setText(act.getAccion());
         holder.txtDistancia.setText(act.getDistancia());
-        // holder.imgPerfil.setImageResource(act.getImagenPerfil()); // Si tienes las imágenes
+        holder.imgPerfil.setImageResource(act.getImagenPerfil());
     }
 
     @Override

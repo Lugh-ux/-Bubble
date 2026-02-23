@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -175,8 +176,8 @@ public class APIRest {
                     java.util.Scanner s = new java.util.Scanner(con.getInputStream()).useDelimiter("\\A");
                     JSONObject response = new JSONObject(s.hasNext() ? s.next() : "");
 
-                    long idUsuario = response.getLong("id");
-                    String nombreUsuario = response.getString("name");
+                    long idUsuario = response.getLong("user_id");
+                    String nombreUsuario = response.getString("username");
 
                     android.content.SharedPreferences pref = actividad.getSharedPreferences("Sesion", android.content.Context.MODE_PRIVATE);
                     android.content.SharedPreferences.Editor editor = pref.edit();
@@ -342,5 +343,29 @@ public class APIRest {
         }).start();
     }
 
+    public void cargarStats(long userId, TextView txtBurbujas, TextView txtDistancia, Activity actividad) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:8080/tema5maven/rest/burbujas/stats/" + userId);
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+
+                if (con.getResponseCode() == 200) {
+                    java.util.Scanner s = new java.util.Scanner(con.getInputStream()).useDelimiter("\\A");
+                    JSONObject json = new JSONObject(s.hasNext() ? s.next() : "");
+
+                    int burbujas = json.getInt("burbujas");
+                    int distancia = json.getInt("distancia");
+
+                    actividad.runOnUiThread(() -> {
+                        txtBurbujas.setText(String.valueOf(burbujas));
+                        txtDistancia.setText(distancia + " km");
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
 
 }

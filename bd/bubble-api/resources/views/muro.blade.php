@@ -23,7 +23,7 @@
 
         .main-layout {
             display: grid;
-            grid-template-columns: 300px 1fr 300px;
+            grid-template-columns: 300px 1fr 250px;
             height: calc(100vh - 70px);
             gap: 20px;
             padding: 20px;
@@ -50,7 +50,6 @@
             letter-spacing: 1px;
         }
 
-        /* ESTILOS DE NOTIFICACIONES PULIDOS */
         .notif-item {
             display: flex;
             align-items: center;
@@ -235,7 +234,14 @@
 
     <nav class="navbar">
         <div class="logo"><img src="{{ asset('img/logo.gif') }}" width="40"> Bubble</div>
-        <a href="#" style="text-decoration: none; color: red; font-weight: bold;">Cerrar sesión</a>
+
+        <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+            @csrf
+            <button type="submit"
+                style="background: none; border: none; color: red; font-weight: bold; cursor: pointer; font-size: 16px; font-family: 'Roboto Mono', monospace;">
+                Cerrar sesión
+            </button>
+        </form>
     </nav>
 
     <div class="main-layout">
@@ -269,51 +275,39 @@
             <div id="map"></div>
         </main>
 
-        <aside class="panel">
-            <div class="profile-info">
-                <div style="position: relative; display: inline-block;">
-                    <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . Auth::user()->name . '&background=3b4cca&color=fff' }}"
-                        alt="Avatar" id="avatarPreview" style="cursor: pointer; object-fit: cover;">
+        <aside class="panel panel-profile"> <div class="profile-info">
+        
+        <a href="{{ route('profile.edit') }}" title="Editar perfil">
+            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . Auth::user()->name . '&background=3b4cca&color=fff' }}"
+                alt="Avatar" id="avatarPreview" style="cursor: pointer; object-fit: cover;">
+        </a>
 
-                    <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data"
-                        id="formAvatar">
-                        @csrf
-                        @method('PATCH')
-                        <input type="file" name="caratula" id="inputAvatar" style="display:none;" accept="image/*"
-                            onchange="this.form.submit();">
-                        <label for="inputAvatar"
-                            style="position: absolute; bottom: 0; right: 0; background: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid #ccc;">
-                            <i class="fas fa-camera" style="color: #3b4cca; font-size: 14px;"></i>
-                        </label>
-                    </form>
+        <h3>{{ Auth::user()->name }}</h3>
+
+        <div class="logo-switch-container">
+            <label class="logo-toggle">
+                @php
+                    $miBurbujaActiva = \App\Models\Bubble::where('user_id', auth()->id())->exists();
+                @endphp
+
+                <input type="checkbox" id="btnToggleBurbuja" onchange="gestionarBurbuja(this)"
+                    {{ $miBurbujaActiva ? 'checked' : '' }}>
+
+                <div class="logo-wrapper">
+                    <img src="{{ asset('img/logo.gif') }}" class="logo-img">
+                    <div class="status-dot"></div>
                 </div>
+            </label>
+        </div>
 
-                <h3>{{ Auth::user()->name }}</h3>
-
-                <div class="logo-switch-container">
-                    <label class="logo-toggle">
-                        @php
-                            $miBurbujaActiva = \App\Models\Bubble::where('user_id', auth()->id())->exists();
-                        @endphp
-
-                        <input type="checkbox" id="btnToggleBurbuja" onchange="gestionarBurbuja(this)"
-                            {{ $miBurbujaActiva ? 'checked' : '' }}>
-
-                        <div class="logo-wrapper">
-                            <img src="{{ asset('img/logo.gif') }}" class="logo-img">
-                            <div class="status-dot"></div>
-                        </div>
-                    </label>
-                </div>
-
-                <form id="formBurbujaToggle" action="" method="POST" style="display: none;">
-                    @csrf
-                    <input type="hidden" name="_method" id="metodo_burbuja" value="POST">
-                    <input type="hidden" name="lat" id="lat_input_switch">
-                    <input type="hidden" name="lng" id="lng_input_switch">
-                </form>
-            </div>
-        </aside>
+        <form id="formBurbujaToggle" action="" method="POST" style="display: none;">
+            @csrf
+            <input type="hidden" name="_method" id="metodo_burbuja" value="POST">
+            <input type="hidden" name="lat" id="lat_input_switch">
+            <input type="hidden" name="lng" id="lng_input_switch">
+        </form>
+    </div>
+</aside>
     </div>
 
     <script>
@@ -321,19 +315,22 @@
         let miLatActual = null;
         let miLngActual = null;
         let mapaCentrado = false;
+        let ultimaActualizacion = 0;
 
         function initMap() {
             const centro = {
                 lat: 40.4167,
                 lng: -3.7037
             };
+
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 17,
                 center: centro,
                 tilt: 45,
                 heading: 0,
                 mapTypeId: 'roadmap',
-                gestureHandling: "greedy"
+                gestureHandling: "greedy",
+                disableDefaultUI: true,
             });
 
             const iconoNavegacion = {
@@ -369,27 +366,34 @@
 
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
                     miLatActual = position.coords.latitude;
                     miLngActual = position.coords.longitude;
                     const miPos = {
                         lat: miLatActual,
                         lng: miLngActual
                     };
+                    const rumbo = position.coords.heading || 0;
+
+                    const ahora = Date.now();
+                    if (ahora - ultimaActualizacion > 2000) {
+                        actualizarRadar(miLatActual, miLngActual);
+                        ultimaActualizacion = ahora;
+                    }
 
                     if (!mapaCentrado) {
                         map.setCenter(miPos);
                         mapaCentrado = true;
-                        document.getElementById('loader').style.opacity = '0';
-                        setTimeout(() => {
-                            document.getElementById('loader').style.display = 'none';
-                        }, 500);
+                        const loader = document.getElementById('loader');
+                        if (loader) {
+                            loader.style.opacity = '0';
+                            setTimeout(() => loader.style.display = 'none', 500);
+                        }
                     }
 
                     if (window.miMarcador) {
                         window.miMarcador.setPosition(miPos);
+                        iconoNavegacion.rotation = rumbo;
+                        window.miMarcador.setIcon(iconoNavegacion);
                     } else {
                         window.miMarcador = new google.maps.Marker({
                             position: miPos,
@@ -397,10 +401,38 @@
                             icon: iconoNavegacion
                         });
                     }
-                }, null, {
-                    enableHighAccuracy: true
+
+                }, (error) => {
+                    console.warn("Error GPS:", error);
+                }, {
+                    enableHighAccuracy: true,
+                    maximumAge: 1000
                 });
             }
+        }
+
+        function actualizarRadar(lat, lng) {
+            fetch(`/api/notificaciones?lat=${lat}&lng=${lng}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Error de red");
+                    return response.text();
+                })
+                .then(data => {
+                    data = data.trim();
+
+                    if (data.startsWith('HJ') || data.length < 5) {
+                        console.warn("Datos corruptos ignorados:", data);
+                        return;
+                    }
+
+                    console.log("Datos recibidos correctamente:", data.substring(0, 50) + "...");
+
+                    const contenedor = document.getElementById('contenedor-notificaciones');
+                    if (contenedor) {
+                        contenedor.innerHTML = data;
+                    }
+                })
+                .catch(err => console.error("Error en radar:", err));
         }
 
         function gestionarBurbuja(checkbox) {
@@ -415,7 +447,7 @@
                     document.getElementById('lng_input_switch').value = miLngActual;
                     form.submit();
                 } else {
-                    alert("GPS no listo.");
+                    alert("Espera a que te localicemos...");
                     checkbox.checked = false;
                 }
             } else {
