@@ -3,24 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioiniciosesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioiniciosesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|c:\\users\\ikerm\\desktop\\proyectointermodular\\escritorio\\bubbleapp\\bubbleapp\\formularios\\formularioiniciosesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioiniciosesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|c:\\users\\ikerm\\desktop\\proyectointermodular\\escritorio\\bubbleapp\\bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|c:\\users\\ikerm\\desktop\\proyectointermodular\\escritorio\\bubbleapp\\bubbleapp\\formularios\\formularioiniciosesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioiniciosesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioregistro.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioregistro.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\servicios\\apicliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\servicios\\apicliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioiniciosesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioiniciosesion.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\formularios\\formularioprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\formularios\\formularioperfil.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
@@ -41,10 +45,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\modelos\\modeloburbuja.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\modelos\\modeloburbuja.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\servicios\\apicliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|solutionrelative:bubbleapp\\servicios\\apicliente.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9351F779-A6CC-4AB1-B5AE-CF5AAF3C0079}|BubbleApp\\BubbleApp.csproj|C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\bubbleapp\\modelos\\sesionusuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -78,11 +78,60 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FormularioPrincipal.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPrincipal.cs",
+              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioPrincipal.cs",
+              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPrincipal.cs [Dise\u00F1o]",
+              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioPrincipal.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T10:40:58.959Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FormularioRegistro.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioRegistro.cs",
+              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioRegistro.cs",
+              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioRegistro.cs [Dise\u00F1o]",
+              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioRegistro.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T10:41:04.939Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "FormularioInicioSesion.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.cs",
+              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioInicioSesion.cs",
+              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.cs [Dise\u00F1o]",
+              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioInicioSesion.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T10:40:46.47Z",
+              "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ApiCliente.cs",
+              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Servicios\\ApiCliente.cs",
+              "RelativeDocumentMoniker": "BubbleApp\\Servicios\\ApiCliente.cs",
+              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Servicios\\ApiCliente.cs",
+              "RelativeToolTip": "BubbleApp\\Servicios\\ApiCliente.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAqwHUAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T10:42:11.893Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "FormularioInicioSesion.Designer.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.Designer.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioInicioSesion.Designer.cs",
@@ -95,42 +144,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "FormularioPrincipal.cs [Dise\u00F1o]",
-              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPrincipal.cs",
-              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioPrincipal.cs",
-              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPrincipal.cs [Dise\u00F1o]",
-              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioPrincipal.cs [Dise\u00F1o]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T10:40:58.959Z",
-              "EditorCaption": " [Dise\u00F1o]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "FormularioRegistro.cs [Dise\u00F1o]",
-              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioRegistro.cs",
-              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioRegistro.cs",
-              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioRegistro.cs [Dise\u00F1o]",
-              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioRegistro.cs [Dise\u00F1o]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T10:41:04.939Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "FormularioInicioSesion.cs [Dise\u00F1o]",
-              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.cs",
-              "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioInicioSesion.cs",
-              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.cs [Dise\u00F1o]",
-              "RelativeToolTip": "BubbleApp\\Formularios\\FormularioInicioSesion.cs [Dise\u00F1o]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T10:40:46.47Z",
-              "EditorCaption": " [Dise\u00F1o]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "FormularioPerfil.cs [Dise\u00F1o]",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPerfil.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioPerfil.cs",
@@ -141,7 +155,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "FormularioPrincipal.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPrincipal.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioPrincipal.cs",
@@ -154,7 +168,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "FormularioPerfil.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioPerfil.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioPerfil.cs",
@@ -166,7 +180,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "FormularioRegistro.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioRegistro.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioRegistro.cs",
@@ -174,11 +188,12 @@
               "RelativeToolTip": "BubbleApp\\Formularios\\FormularioRegistro.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T11:24:52.237Z"
+              "WhenOpened": "2026-03-29T11:24:52.237Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "FormularioInicioSesion.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Formularios\\FormularioInicioSesion.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Formularios\\FormularioInicioSesion.cs",
@@ -186,12 +201,11 @@
               "RelativeToolTip": "BubbleApp\\Formularios\\FormularioInicioSesion.cs",
               "ViewState": "AgIAAFIAAAAAAAAAAAAgwF8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T11:27:30.722Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T11:27:30.722Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "ModeloBurbuja.cs",
               "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Modelos\\ModeloBurbuja.cs",
               "RelativeDocumentMoniker": "BubbleApp\\Modelos\\ModeloBurbuja.cs",
@@ -236,18 +250,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-29T10:42:08.251Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "ApiCliente.cs",
-              "DocumentMoniker": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Servicios\\ApiCliente.cs",
-              "RelativeDocumentMoniker": "BubbleApp\\Servicios\\ApiCliente.cs",
-              "ToolTip": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\Servicios\\ApiCliente.cs",
-              "RelativeToolTip": "BubbleApp\\Servicios\\ApiCliente.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T10:42:11.893Z"
             },
             {
               "$type": "Document",

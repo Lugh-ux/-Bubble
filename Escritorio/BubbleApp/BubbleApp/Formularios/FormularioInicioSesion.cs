@@ -20,6 +20,7 @@ namespace BubbleApp.Formularios
         {
             ToggleLoading(true, "Validando credenciales...");
 
+            string error = null;
             try
             {
                 var session = await _apiClient.LoginAsync(_emailTextBox.Text.Trim(), _passwordTextBox.Text);
@@ -28,11 +29,11 @@ namespace BubbleApp.Formularios
             }
             catch (Exception ex)
             {
-                _statusLabel.Text = ex.Message;
+                error = ex.Message;
             }
             finally
             {
-                ToggleLoading(false, string.Empty);
+                ToggleLoading(false, error ?? string.Empty);
             }
         }
 
@@ -72,7 +73,18 @@ namespace BubbleApp.Formularios
         {
             _loginButton.Enabled = !isLoading;
             _registerLink.Enabled = !isLoading;
-            _statusLabel.ForeColor = isLoading ? Color.FromArgb(59, 76, 202) : Color.Firebrick;
+            if (isLoading)
+            {
+                _statusLabel.ForeColor = Color.FromArgb(59, 76, 202);
+            }
+            else if (!string.IsNullOrWhiteSpace(message))
+            {
+                _statusLabel.ForeColor = Color.Firebrick;
+            }
+            else
+            {
+                _statusLabel.ForeColor = Color.FromArgb(95, 95, 95);
+            }
             _statusLabel.Text = message;
         }
 

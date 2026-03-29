@@ -1,4 +1,5 @@
 using BubbleApp.Modelos;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,10 @@ namespace BubbleApp.Controles
         private readonly JavaScriptSerializer _serializer;
         private readonly string _googleMapsApiKey;
         private bool _mapaInicializado;
+        private bool _initializationStarted;
+        private bool _isNavigating;
+        private bool _jsMapReady;
+        private int _renderGeneration;
         private double _lastLatitude = 42.2406;
         private double _lastLongitude = -8.7261;
         private List<ModeloBurbuja> _lastBubbles = new List<ModeloBurbuja>();
@@ -71,7 +76,12 @@ namespace BubbleApp.Controles
             Controls.Add(_mapa);
             Controls.Add(_panelSuperior);
 
-            InitializeMapAsync();
+            // WebView2 necesita que el control tenga handle; inicializamos en HandleCreated.
+            HandleCreated += (s, e) => StartInitializeMap();
+            if (IsHandleCreated)
+            {
+                StartInitializeMap();
+            }
         }
 
         public void UpdateData(double latitude, double longitude, IEnumerable<ModeloBurbuja> bubbles)
@@ -89,25 +99,81 @@ namespace BubbleApp.Controles
 
             if (!_mapaInicializado)
             {
+                // Persistimos el estado aunque WebView2 aun no haya terminado de inicializarse,
+                // para que el primer render use los datos correctos.
+                _lastLatitude = latitude;
+                _lastLongitude = longitude;
+                _lastBubbles = newBubbles;
+                _fullRenderPending = true;
                 return;
             }
 
-            bool locationChanged = Math.Abs(_lastLatitude - latitude) > 0.0001 || 
-                                   Math.Abs(_lastLongitude - longitude) > 0.0001;
-            bool bubblesCountChanged = _lastBubbles.Count != newBubbles.Count;
+            var prevLat = _lastLatitude;
+            var prevLng = _lastLongitude;
+            var prevCount = _lastBubbles.Count;
 
             _lastLatitude = latitude;
             _lastLongitude = longitude;
             _lastBubbles = newBubbles;
 
+            bool locationChanged = Math.Abs(prevLat - latitude) > 0.0001 || 
+                                   Math.Abs(prevLng - longitude) > 0.0001;
+            bool bubblesCountChanged = prevCount != newBubbles.Count;
+
             if (locationChanged || bubblesCountChanged)
             {
                 _fullRenderPending = true;
-                RenderMap();
+                if (_jsMapReady && !_isNavigating)
+                {
+                    ReplaceMapDataInPlaceAsync();
+                }
+                else
+                {
+                    RenderMap();
+                }
             }
             else
             {
                 UpdateBubblesPositionsAsync(newBubbles);
+            }
+        }
+
+        private async void ReplaceMapDataInPlaceAsync()
+        {
+            if (!_mapaInicializado || _mapa.CoreWebView2 == null || _isNavigating || !_jsMapReady)
+            {
+                return;
+            }
+
+            try
+            {
+                var bubbles = _lastBubbles.Select(bubble => new
+                {
+                    id = bubble.Id,
+                    lat = bubble.Latitude,
+                    lng = bubble.Longitude,
+                    nombre = bubble.IsCurrentUser ? "Tu burbuja activa" : (bubble.User?.Name ?? "Usuario"),
+                    mensaje = bubble.Message ?? string.Empty,
+                    distancia = bubble.DistanceLabel ?? string.Empty,
+                    propia = bubble.IsCurrentUser
+                }).ToList();
+
+                var bubblesJson = _serializer.Serialize(bubbles);
+                var script = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "if (typeof replaceMapData === 'function') {{ replaceMapData({{ lat: {0}, lng: {1} }}, {2}); }}",
+                    _lastLatitude,
+                    _lastLongitude,
+                    bubblesJson);
+
+                await _mapa.ExecuteScriptAsync(script);
+                _fullRenderPending = false;
+            }
+            catch
+            {
+                // Si falla el script, volvemos al render completo.
+                _fullRenderPending = true;
+                RenderMap();
             }
         }
 
@@ -150,6 +216,33 @@ namespace BubbleApp.Controles
             UpdateData(_lastLatitude, _lastLongitude, testBubbles);
         }
 
+        public async Task FocusBubbleAsync(int bubbleId)
+        {
+            if (!_mapaInicializado || _mapa.CoreWebView2 == null || _isNavigating)
+            {
+                return;
+            }
+
+            try
+            {
+                await _mapa.ExecuteScriptAsync($"if (typeof focusBubble === 'function') focusBubble({bubbleId});");
+            }
+            catch
+            {
+            }
+        }
+
+        private void StartInitializeMap()
+        {
+            if (_initializationStarted)
+            {
+                return;
+            }
+
+            _initializationStarted = true;
+            InitializeMapAsync();
+        }
+
         private async void InitializeMapAsync()
         {
             if (string.IsNullOrWhiteSpace(_googleMapsApiKey))
@@ -160,13 +253,175 @@ namespace BubbleApp.Controles
 
             try
             {
-                await _mapa.EnsureCoreWebView2Async();
+                _infoLabel.Text = "Inicializando WebView2...";
+                // Workaround: en algunos equipos WebView2 puede "cargar" pero renderizar en blanco por GPU/driver.
+                // Forzamos software rendering para este control.
+                var envOptions = new CoreWebView2EnvironmentOptions("--disable-gpu");
+                var env = await CoreWebView2Environment.CreateAsync(null, null, envOptions);
+                await _mapa.EnsureCoreWebView2Async(env);
                 _mapa.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
                 _mapa.CoreWebView2.Settings.AreDevToolsEnabled = true;
+                _mapa.CoreWebView2.Settings.IsStatusBarEnabled = false;
+
+                // Reenvia console.log/warn/error y errores globales JS a C# via postMessage,
+                // porque en esta version no existe CoreWebView2.ConsoleMessageReceived.
+                _mapa.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                _mapa.CoreWebView2.WebMessageReceived += (s, e) =>
+                {
+                    try
+                    {
+                        var msg = e.TryGetWebMessageAsString() ?? string.Empty;
+                        System.Diagnostics.Debug.WriteLine($"[WebView2][msg] {msg}");
+
+                        if (!string.IsNullOrWhiteSpace(msg) && msg.TrimStart().StartsWith("{", StringComparison.Ordinal))
+                        {
+                            var dict = _serializer.Deserialize<Dictionary<string, object>>(msg);
+                            if (dict != null && dict.TryGetValue("type", out var typeObj) && (typeObj as string) == "console")
+                            {
+                                var level = dict.TryGetValue("level", out var levelObj) ? (levelObj as string) : null;
+                                var message = dict.TryGetValue("message", out var messageObj) ? (messageObj as string) : null;
+
+                                if (!string.IsNullOrWhiteSpace(message))
+                                {
+                                    if (message.IndexOf("gm_authFailure", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                        message.IndexOf("API key no es valida", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = "Google Maps no autorizado (API key/restricciones).";
+                                        }));
+                                    }
+                                    else if (message.IndexOf("ERROR cargando Google Maps JS", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                             message.IndexOf("maps.googleapis.com", StringComparison.OrdinalIgnoreCase) >= 0 && (level == "error" || level == "onerror"))
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = "No se pudo cargar Google Maps (internet/bloqueo).";
+                                        }));
+                                    }
+                                    else if (message.IndexOf("MAPA LISTO", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = "Mapa cargado.";
+                                            _jsMapReady = true;
+                                        }));
+                                    }
+                                    else if (message.IndexOf("tilesloaded", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = "Mapa cargado.";
+                                            _jsMapReady = true;
+                                        }));
+                                    }
+                                    else if (message.IndexOf("Mapa creado", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = "Cargando mapa...";
+                                        }));
+                                    }
+                                    else if (message.IndexOf("JS ERROR:", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                             message.IndexOf("PROMISE ERROR:", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        var shortMsg = message.Length > 120 ? message.Substring(0, 120) : message;
+                                        BeginInvoke(new Action(() =>
+                                        {
+                                            _infoLabel.Text = shortMsg;
+                                        }));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                };
+
+                await _mapa.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+(() => {
+  function safeStringify(v) {
+    try { return typeof v === 'string' ? v : JSON.stringify(v); } catch { return String(v); }
+  }
+  function post(level, args) {
+    try {
+      if (window.chrome && window.chrome.webview && typeof window.chrome.webview.postMessage === 'function') {
+        const message = Array.prototype.slice.call(args).map(safeStringify).join(' ');
+        window.chrome.webview.postMessage(JSON.stringify({ type: 'console', level, message }));
+      }
+    } catch { }
+  }
+  const orig = { log: console.log, warn: console.warn, error: console.error };
+  console.log = function() { post('log', arguments); orig.log.apply(console, arguments); };
+  console.warn = function() { post('warn', arguments); orig.warn.apply(console, arguments); };
+  console.error = function() { post('error', arguments); orig.error.apply(console, arguments); };
+  window.addEventListener('error', (ev) => post('onerror', [ev.message, ev.filename, ev.lineno, ev.colno]));
+  window.addEventListener('unhandledrejection', (ev) => post('unhandledrejection', [safeStringify(ev.reason)]));
+})();");
+
+                _mapa.CoreWebView2.NavigationCompleted += (s, e) =>
+                {
+                    if (!e.IsSuccess)
+                    {
+                        _infoLabel.Text = "Error cargando el mapa (WebView2): " + e.WebErrorStatus;
+                    }
+                };
+
+                _mapa.CoreWebView2.ProcessFailed += (s, e) =>
+                {
+                    BeginInvoke(new Action(() =>
+                    {
+                        _infoLabel.Text = "WebView2 se ha reiniciado. Recargando mapa...";
+                        try
+                        {
+                            _isNavigating = false;
+                            _jsMapReady = false;
+                            _fullRenderPending = true;
+                            RenderMap();
+                        }
+                        catch
+                        {
+                            // Si Reload falla, forzamos un render completo.
+                            _fullRenderPending = true;
+                            RenderMap();
+                        }
+                    }));
+                };
+
+                // Evita romper el WebView2: no navegamos de nuevo mientras una navegacion este en curso.
+                _mapa.NavigationStarting += (s, e) => { _isNavigating = true; _jsMapReady = false; };
+                _mapa.NavigationCompleted += (s, e) =>
+                {
+                    _isNavigating = false;
+                    if (_fullRenderPending)
+                    {
+                        _fullRenderPending = false;
+                        // Si llegaron cambios durante la navegacion, rendereamos al terminar.
+                        BeginInvoke(new Action(RenderMap));
+                    }
+                };
+
                 _mapaInicializado = true;
-                
-                System.Threading.Tasks.Task.Delay(100).Wait();
-                RenderMap();
+
+                _infoLabel.Text = "Cargando mapa...";
+                await Task.Delay(50);
+
+                // Si llegaron datos antes de inicializar, renderizamos usando el ultimo estado.
+                if (_fullRenderPending)
+                {
+                    RenderMap();
+                    _fullRenderPending = false;
+                }
+                else
+                {
+                    RenderMap();
+                }
+            }
+            catch (WebView2RuntimeNotFoundException ex)
+            {
+                _infoLabel.Text = "WebView2 Runtime no esta instalado: " + ex.Message;
             }
             catch (Exception ex)
             {
@@ -182,8 +437,18 @@ namespace BubbleApp.Controles
                 return;
             }
 
+            if (_isNavigating)
+            {
+                _fullRenderPending = true;
+                return;
+            }
+
             try
             {
+                _jsMapReady = false;
+                _infoLabel.Text = "Cargando mapa...";
+                var myGeneration = ++_renderGeneration;
+
                 var bubbles = _lastBubbles.Select(bubble => new
                 {
                     id = bubble.Id,
@@ -197,9 +462,87 @@ namespace BubbleApp.Controles
 
                 var bubblesJson = _serializer.Serialize(bubbles);
                 System.Diagnostics.Debug.WriteLine($"[ControlMapaRadar] RenderMap - Bubbles: {bubbles.Count}, JSON length: {bubblesJson.Length}");
-                
+
                 var html = BuildHtml(_lastLatitude, _lastLongitude, bubblesJson);
                 _mapa.NavigateToString(html);
+
+                // Watchdog: si el JS no llega a "MAPA LISTO", reintentamos una vez.
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(8000).ConfigureAwait(false);
+                    if (myGeneration != _renderGeneration)
+                    {
+                        return;
+                    }
+
+                    if (_mapaInicializado && !_isNavigating && !_jsMapReady)
+                    {
+                        try
+                        {
+                            BeginInvoke(new Action(() =>
+                            {
+                                if (myGeneration != _renderGeneration)
+                                {
+                                    return;
+                                }
+
+                                _infoLabel.Text = "Reintentando cargar el mapa...";
+                                _fullRenderPending = true;
+                                RenderMap();
+                            }));
+                        }
+                        catch
+                        {
+                        }
+                    }
+                });
+
+                // Diagnostico: si a los 2-4s no hay google.maps o el contenedor sigue a 0, lo mostramos en UI.
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(2500).ConfigureAwait(false);
+                    if (myGeneration != _renderGeneration || !_mapaInicializado || _mapa.CoreWebView2 == null)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        var script = @"
+(() => {
+  const el = document.getElementById('map');
+  const size = el ? (el.offsetWidth + 'x' + el.offsetHeight) : 'no-map';
+  const hasGoogle = (typeof google !== 'undefined');
+  const hasMaps = (hasGoogle && !!google.maps);
+  const ready = (typeof mapStarted !== 'undefined') ? mapStarted : null;
+  return JSON.stringify({ size, hasGoogle, hasMaps, mapStarted: ready, readyState: document.readyState });
+})();";
+
+                        var raw = await _mapa.ExecuteScriptAsync(script).ConfigureAwait(false);
+                        // raw viene como string JSON-quoted desde WebView2.
+                        var cleaned = (raw ?? string.Empty).Trim().Trim('"').Replace("\\\"", "\"");
+                        if (string.IsNullOrWhiteSpace(cleaned))
+                        {
+                            return;
+                        }
+
+                        BeginInvoke(new Action(() =>
+                        {
+                            if (myGeneration != _renderGeneration)
+                            {
+                                return;
+                            }
+
+                            if (!_jsMapReady)
+                            {
+                                _infoLabel.Text = "Diagnostico mapa: " + cleaned;
+                            }
+                        }));
+                    }
+                    catch
+                    {
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -211,6 +554,11 @@ namespace BubbleApp.Controles
         private async void UpdateBubblesPositionsAsync(List<ModeloBurbuja> newBubbles)
         {
             if (!_mapaInicializado || _mapa.CoreWebView2 == null)
+            {
+                return;
+            }
+
+            if (_isNavigating)
             {
                 return;
             }
@@ -254,13 +602,11 @@ namespace BubbleApp.Controles
             html.AppendLine("* { margin: 0; padding: 0; box-sizing: border-box; }");
             html.AppendLine("html, body { height: 100%; width: 100%; }");
             html.AppendLine("#map { height: 100%; width: 100%; background: #171b24; }");
-            html.AppendLine("#debug { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 8px; font-family: monospace; font-size: 11px; z-index: 10; max-width: 300px; }");
             html.AppendLine(".gm-style-iw { font-family: Segoe UI, sans-serif; }");
             html.AppendLine("</style>");
             html.AppendLine("</head>");
             html.AppendLine("<body>");
             html.AppendLine("<div id=\"map\"></div>");
-            html.AppendLine("<div id=\"debug\"></div>");
             html.AppendLine("<script>");
             html.AppendLine("let map;");
             html.AppendLine("let markers = {};");
@@ -270,12 +616,17 @@ namespace BubbleApp.Controles
             html.AppendLine("let userMarker;");
             html.AppendLine("");
             html.AppendLine("function debugLog(msg) {");
-            html.AppendLine("  console.log(msg);");
-            html.AppendLine("  const debugDiv = document.getElementById('debug');");
-            html.AppendLine("  debugDiv.innerHTML = debugDiv.innerHTML + msg + '<br>';");
+            html.AppendLine("  try { console.log(msg); } catch(e) {}");
             html.AppendLine("}");
             html.AppendLine("");
             html.AppendLine("debugLog('Script iniciado');");
+            html.AppendLine("");
+            html.AppendLine("window.addEventListener('error', function(ev) {");
+            html.AppendLine("  debugLog('JS ERROR: ' + ev.message);");
+            html.AppendLine("});");
+            html.AppendLine("window.addEventListener('unhandledrejection', function(ev) {");
+            html.AppendLine("  debugLog('PROMISE ERROR: ' + (ev.reason && ev.reason.message ? ev.reason.message : ev.reason));");
+            html.AppendLine("});");
             html.AppendLine("");
             html.AppendLine("function initMap() {");
             html.AppendLine("  debugLog('initMap llamada');");
@@ -307,14 +658,33 @@ namespace BubbleApp.Controles
             html.AppendLine("  });");
             html.AppendLine("  ");
             html.AppendLine("  debugLog('Mapa creado');");
-            html.AppendLine("  ");
-            html.AppendLine("  userMarker = new google.maps.Marker({");
-            html.AppendLine("    position: usuario,");
-            html.AppendLine("    map: map,");
-            html.AppendLine("    title: 'Tu ubicacion',");
-            html.AppendLine("    label: { text: 'YO', color: '#ffffff', fontWeight: '700' },");
-            html.AppendLine("    icon: { path: google.maps.SymbolPath.CIRCLE, scale: 11, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 }");
+            html.AppendLine("  function forceResize() {");
+            html.AppendLine("    try { google.maps.event.trigger(map, 'resize'); } catch(e) {}");
+            html.AppendLine("  }");
+            html.AppendLine("  setTimeout(forceResize, 150);");
+            html.AppendLine("  setTimeout(function() { try { map.setCenter(usuario); } catch(e) {} }, 250);");
+            html.AppendLine("  window.addEventListener('resize', function() {");
+            html.AppendLine("    setTimeout(forceResize, 50);");
             html.AppendLine("  });");
+            html.AppendLine("  google.maps.event.addListenerOnce(map, 'tilesloaded', function() { debugLog('tilesloaded'); });");
+            html.AppendLine("  google.maps.event.addListenerOnce(map, 'idle', function() {");
+            html.AppendLine("    debugLog('idle');");
+            html.AppendLine("    debugLog('MAPA LISTO');");
+            html.AppendLine("  });");
+            html.AppendLine("  ");
+            html.AppendLine("  try {");
+            html.AppendLine("    if (typeof google === 'undefined' || !google.maps) throw new Error('google.maps no disponible');");
+            html.AppendLine("    if (typeof google.maps.Marker !== 'function') throw new Error('google.maps.Marker no disponible');");
+            html.AppendLine("    userMarker = new google.maps.Marker({");
+            html.AppendLine("      position: usuario,");
+            html.AppendLine("      map: map,");
+            html.AppendLine("      title: 'Tu ubicacion',");
+            html.AppendLine("      label: { text: 'YO', color: '#ffffff', fontWeight: '700' },");
+            html.AppendLine("      icon: { path: google.maps.SymbolPath.CIRCLE, scale: 11, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 }");
+            html.AppendLine("    });");
+            html.AppendLine("  } catch(e) {");
+            html.AppendLine("    debugLog('Error creando marcador usuario: ' + e.message);");
+            html.AppendLine("  }");
             html.AppendLine("  ");
             html.AppendLine("  debugLog('Marcador usuario creado');");
             html.AppendLine("  bounds.extend(usuario);");
@@ -373,7 +743,6 @@ namespace BubbleApp.Controles
             html.AppendLine("    debugLog('Sin burbujas, zoom por defecto');");
             html.AppendLine("  }");
             html.AppendLine("  ");
-            html.AppendLine("  debugLog('MAPA LISTO');");
             html.AppendLine("}");
             html.AppendLine("");
             html.AppendLine("function updateBubblePositions(newBubbles) {");
@@ -404,25 +773,156 @@ namespace BubbleApp.Controles
             html.AppendLine("  });");
             html.AppendLine("}");
             html.AppendLine("");
-            html.AppendLine("window.addEventListener('load', function() {");
-            html.AppendLine("  debugLog('Window load');");
-            html.AppendLine("  initMap();");
-            html.AppendLine("});");
+            html.AppendLine("function replaceMapData(usuario, bubbles) {");
+            html.AppendLine("  debugLog('replaceMapData: ' + (bubbles ? bubbles.length : 0) + ' burbujas');");
+            html.AppendLine("  try {");
+            html.AppendLine("    if (!map || !google || !google.maps) { debugLog('replaceMapData: mapa no listo'); return; }");
+            html.AppendLine("    bounds = new google.maps.LatLngBounds();");
+            html.AppendLine("    bounds.extend(usuario);");
             html.AppendLine("");
-            html.AppendLine("if (document.readyState === 'loading') {");
-            html.AppendLine("  document.addEventListener('DOMContentLoaded', function() {");
-            html.AppendLine("    debugLog('DOMContentLoaded');");
-            html.AppendLine("    initMap();");
-            html.AppendLine("  });");
-            html.AppendLine("} else if (document.readyState === 'interactive') {");
-            html.AppendLine("  debugLog('Document interactive, llamando initMap');");
-            html.AppendLine("  initMap();");
+            html.AppendLine("    try {");
+            html.AppendLine("      if (userMarker && typeof userMarker.setPosition === 'function') {");
+            html.AppendLine("        userMarker.setPosition(usuario);");
+            html.AppendLine("      } else {");
+            html.AppendLine("        userMarker = new google.maps.Marker({");
+            html.AppendLine("          position: usuario,");
+            html.AppendLine("          map: map,");
+            html.AppendLine("          title: 'Tu ubicacion',");
+            html.AppendLine("          label: { text: 'YO', color: '#ffffff', fontWeight: '700' },");
+            html.AppendLine("          icon: { path: google.maps.SymbolPath.CIRCLE, scale: 11, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 2 }");
+            html.AppendLine("        });");
+            html.AppendLine("      }");
+            html.AppendLine("    } catch(e) {");
+            html.AppendLine("      debugLog('replaceMapData: error userMarker: ' + e.message);");
+            html.AppendLine("    }");
+            html.AppendLine("");
+            html.AppendLine("    Object.keys(markers).forEach(function(markerKey) {");
+            html.AppendLine("      try {");
+            html.AppendLine("        if (markers[markerKey] && markers[markerKey].marker) markers[markerKey].marker.setMap(null);");
+            html.AppendLine("        if (infoWindows[markerKey]) infoWindows[markerKey].close();");
+            html.AppendLine("        if (circles[markerKey]) circles[markerKey].setMap(null);");
+            html.AppendLine("      } catch(e) {}");
+            html.AppendLine("    });");
+            html.AppendLine("    markers = {}; circles = {}; infoWindows = {};");
+            html.AppendLine("");
+            html.AppendLine("    (bubbles || []).forEach(function(bubble, index) {");
+            html.AppendLine("      try {");
+            html.AppendLine("        const posicion = { lat: bubble.lat, lng: bubble.lng };");
+            html.AppendLine("        const color = bubble.propia ? '#00a86b' : '#d62839';");
+            html.AppendLine("        const marcador = new google.maps.Marker({");
+            html.AppendLine("          position: posicion,");
+            html.AppendLine("          map: map,");
+            html.AppendLine("          title: bubble.nombre,");
+            html.AppendLine("          label: { text: bubble.propia ? 'TU' : 'B', color: '#ffffff', fontWeight: '700' },");
+            html.AppendLine("          icon: { path: google.maps.SymbolPath.CIRCLE, scale: bubble.propia ? 14 : 12, fillColor: color, fillOpacity: 0.95, strokeColor: '#ffffff', strokeWeight: 2 }");
+            html.AppendLine("        });");
+            html.AppendLine("        const contenido = '<div style=\"font-family: Segoe UI, sans-serif; padding: 8px;\"><strong>' + bubble.nombre + '</strong><br>' + (bubble.mensaje || '') + (bubble.distancia ? '<br><small>' + bubble.distancia + '</small>' : '') + '</div>';");
+            html.AppendLine("        const info = new google.maps.InfoWindow({ content: contenido });");
+            html.AppendLine("        marcador.addListener('click', function() { info.open({ anchor: marcador, map: map }); });");
+            html.AppendLine("        const circulo = new google.maps.Circle({");
+            html.AppendLine("          strokeColor: color,");
+            html.AppendLine("          strokeOpacity: 0.75,");
+            html.AppendLine("          strokeWeight: 1.5,");
+            html.AppendLine("          fillColor: color,");
+            html.AppendLine("          fillOpacity: bubble.propia ? 0.24 : 0.18,");
+            html.AppendLine("          map: map,");
+            html.AppendLine("          center: posicion,");
+            html.AppendLine("          radius: 50");
+            html.AppendLine("        });");
+            html.AppendLine("        const markerKey = 'bubble_' + bubble.id;");
+            html.AppendLine("        markers[markerKey] = { marker: marcador, info: info };");
+            html.AppendLine("        circles[markerKey] = circulo;");
+            html.AppendLine("        infoWindows[markerKey] = info;");
+            html.AppendLine("        bounds.extend(posicion);");
+            html.AppendLine("      } catch(e) {");
+            html.AppendLine("        debugLog('replaceMapData: error burbuja ' + index + ': ' + e.message);");
+            html.AppendLine("      }");
+            html.AppendLine("    });");
+            html.AppendLine("");
+            html.AppendLine("    if ((bubbles || []).length > 0) {");
+            html.AppendLine("      map.fitBounds(bounds);");
+            html.AppendLine("      google.maps.event.addListenerOnce(map, 'bounds_changed', function() { if (map.getZoom() > 17) map.setZoom(17); });");
+            html.AppendLine("    } else {");
+            html.AppendLine("      map.setCenter(usuario);");
+            html.AppendLine("      map.setZoom(15);");
+            html.AppendLine("    }");
+            html.AppendLine("    try { google.maps.event.trigger(map, 'resize'); } catch(e) {}");
+            html.AppendLine("  } catch(e) {");
+            html.AppendLine("    debugLog('replaceMapData error: ' + e.message);");
+            html.AppendLine("  }");
             html.AppendLine("}");
-            html.AppendLine("</script>");
+            html.AppendLine("");
+            html.AppendLine("function focusBubble(id) {");
+            html.AppendLine("  try {");
+            html.AppendLine("    const key = 'bubble_' + id;");
+            html.AppendLine("    if (!markers[key] || !markers[key].marker) {");
+            html.AppendLine("      debugLog('focusBubble: no existe ' + key);");
+            html.AppendLine("      return;");
+            html.AppendLine("    }");
+            html.AppendLine("    const m = markers[key].marker;");
+            html.AppendLine("    const pos = m.getPosition();");
+            html.AppendLine("    if (pos) {");
+            html.AppendLine("      map.panTo(pos);");
+            html.AppendLine("      if (map.getZoom() < 16) map.setZoom(16);");
+            html.AppendLine("    }");
+            html.AppendLine("    if (markers[key].info) markers[key].info.open(map, m);");
+            html.AppendLine("    debugLog('focusBubble: ' + key);");
+            html.AppendLine("  } catch(e) {");
+            html.AppendLine("    debugLog('focusBubble error: ' + e.message);");
+            html.AppendLine("  }");
+            html.AppendLine("}");
+            html.AppendLine("");
+            // Google Maps llama a gm_authFailure si la clave/API esta restringida o no autorizada.
+            html.AppendLine("window.gm_authFailure = function() {");
+            html.AppendLine("  debugLog('gm_authFailure: la API key no es valida o esta restringida');");
+            html.AppendLine("};");
+            html.AppendLine("");
+            html.AppendLine("let mapsApiLoaded = false;");
+            html.AppendLine("let mapStarted = false;");
+            html.AppendLine("");
+            html.AppendLine("function onGoogleMapsApiLoaded() {");
+            html.AppendLine("  mapsApiLoaded = true;");
+            html.AppendLine("  debugLog('Google Maps API loaded');");
+            html.AppendLine("  startMapWhenReady();");
+            html.AppendLine("}");
+            html.AppendLine("");
+            html.AppendLine("function startMapWhenReady() {");
+            html.AppendLine("  if (mapStarted) return;");
+            html.AppendLine("  if (!mapsApiLoaded) {");
+            html.AppendLine("    debugLog('Esperando a Google Maps API...');");
+            html.AppendLine("    return;");
+            html.AppendLine("  }");
+            html.AppendLine("  const el = document.getElementById('map');");
+            html.AppendLine("  if (!el || el.offsetWidth === 0 || el.offsetHeight === 0) {");
+            html.AppendLine("    debugLog('Esperando tamanio del contenedor: ' + (el ? (el.offsetWidth + 'x' + el.offsetHeight) : 'no map'));");
+            html.AppendLine("    setTimeout(startMapWhenReady, 50);");
+            html.AppendLine("    return;");
+            html.AppendLine("  }");
+            html.AppendLine("  mapStarted = true;");
+            html.AppendLine("  try {");
+            html.AppendLine("    initMap();");
+            html.AppendLine("  } catch(e) {");
+            html.AppendLine("    debugLog('Error en initMap: ' + e.message);");
+            html.AppendLine("  }");
+            html.AppendLine("}");
+            html.AppendLine("");
+            html.AppendLine("function loadGoogleMaps() {");
+            html.AppendLine("  debugLog('Cargando Google Maps JS...');");
+            html.AppendLine("  const script = document.createElement('script');");
             html.AppendFormat(
                 CultureInfo.InvariantCulture,
-                "<script async defer src=\"https://maps.googleapis.com/maps/api/js?key={0}&callback=initMap\"></script>",
+                "  script.src = 'https://maps.googleapis.com/maps/api/js?key={0}&callback=onGoogleMapsApiLoaded';",
                 _googleMapsApiKey).AppendLine();
+            html.AppendLine("  script.async = true;");
+            html.AppendLine("  script.defer = true;");
+            html.AppendLine("  script.onerror = function() {");
+            html.AppendLine("    debugLog('ERROR cargando Google Maps JS (internet/bloqueo/API key)');");
+            html.AppendLine("  };");
+            html.AppendLine("  document.head.appendChild(script);");
+            html.AppendLine("}");
+            html.AppendLine("");
+            html.AppendLine("loadGoogleMaps();");
+            html.AppendLine("</script>");
             html.AppendLine("</body>");
             html.AppendLine("</html>");
             return html.ToString();

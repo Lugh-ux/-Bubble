@@ -23,6 +23,7 @@ class ControladorBurbujaEscritorio extends Controller
         $bubbles = $this->nearbyBubbles($lat, $lng, $user->id)
             ->map(fn (Bubble $bubble) => $this->formatBubble($bubble));
 
+        // Evita 500 si hay textos con bytes invalidos en BD (Malformed UTF-8 characters).
         return response()->json([
             'current_user' => [
                 'id' => $user->id,
@@ -33,7 +34,7 @@ class ControladorBurbujaEscritorio extends Controller
             'my_bubble_active' => $myBubble !== null,
             'my_bubble' => $myBubble ? $this->formatBubble($myBubble, true) : null,
             'bubbles' => $bubbles->values(),
-        ]);
+        ], 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
     }
 
     public function store(Request $request)
@@ -70,6 +71,7 @@ class ControladorBurbujaEscritorio extends Controller
     private function nearbyBubbles(float $lat, float $lng, int $currentUserId)
     {
         return Bubble::with('user')
+            ->whereHas('user')
             ->where('user_id', '!=', $currentUserId)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
@@ -90,6 +92,7 @@ class ControladorBurbujaEscritorio extends Controller
     private function formatBubble(Bubble $bubble, bool $isCurrentUser = false): array
     {
         $distance = (float) ($bubble->distance ?? 0);
+        $user = $bubble->user;
 
         return [
             'id' => $bubble->id,
@@ -102,9 +105,10 @@ class ControladorBurbujaEscritorio extends Controller
                 : number_format($distance, 1) . ' km',
             'is_current_user' => $isCurrentUser,
             'user' => [
-                'id' => $bubble->user->id,
-                'name' => $bubble->user->name,
-                'avatar_url' => $bubble->user->avatar ? asset('storage/' . $bubble->user->avatar) : null,
+                // Si hay datos inconsistentes (burbuja huérfana), evitamos 500.
+                'id' => $user?->id ?? 0,
+                'name' => $user?->name ?? 'Usuario',
+                'avatar_url' => $user && $user->avatar ? asset('storage/' . $user->avatar) : null,
             ],
         ];
     }

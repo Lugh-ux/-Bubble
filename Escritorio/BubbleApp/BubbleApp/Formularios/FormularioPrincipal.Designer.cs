@@ -85,6 +85,7 @@ namespace BubbleApp.Formularios
             // 
             // buttonCerrarSesion
             // 
+            this.buttonCerrarSesion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCerrarSesion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonCerrarSesion.ForeColor = System.Drawing.Color.Firebrick;
             this.buttonCerrarSesion.Location = new System.Drawing.Point(1217, 12);
@@ -111,9 +112,9 @@ namespace BubbleApp.Formularios
             this.tablaPrincipal.BackgroundImage = global::BubbleApp.Properties.Resources.fondo10;
             this.tablaPrincipal.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.tablaPrincipal.ColumnCount = 3;
-            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 330F));
-            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 310F));
+            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tablaPrincipal.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tablaPrincipal.Controls.Add(this.panelRadar, 0, 0);
             this.tablaPrincipal.Controls.Add(this.panelMapa, 1, 0);
             this.tablaPrincipal.Controls.Add(this.panelPerfil, 2, 0);
@@ -121,7 +122,8 @@ namespace BubbleApp.Formularios
             this.tablaPrincipal.Location = new System.Drawing.Point(0, 72);
             this.tablaPrincipal.Name = "tablaPrincipal";
             this.tablaPrincipal.Padding = new System.Windows.Forms.Padding(20);
-            this.tablaPrincipal.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 748F));
+            this.tablaPrincipal.RowCount = 1;
+            this.tablaPrincipal.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tablaPrincipal.Size = new System.Drawing.Size(1400, 788);
             this.tablaPrincipal.TabIndex = 0;
             // 
@@ -341,6 +343,7 @@ namespace BubbleApp.Formularios
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(19)))), ((int)(((byte)(19)))), ((int)(((byte)(19)))));
             this.BackgroundImage = global::BubbleApp.Properties.Resources.fondo10;
             this.ClientSize = new System.Drawing.Size(1400, 860);
