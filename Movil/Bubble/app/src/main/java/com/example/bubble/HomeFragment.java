@@ -88,6 +88,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mMap.setMyLocationEnabled(true);
 
             centrarCamaraAlInicio();
+            startLocationUpdates();
         } else {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -104,6 +105,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 handler.postDelayed(this, 30000);
             }
         };
+        handler.postDelayed(refrescoBurbujas, 30000);
     }
 
 

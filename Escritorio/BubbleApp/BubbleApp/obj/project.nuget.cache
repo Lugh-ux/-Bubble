@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "lvb1PofxiG0=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\BubbleApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ikerm\\.nuget\\packages\\microsoft.web.webview2\\1.0.2903.40\\microsoft.web.webview2.1.0.2903.40.nupkg.sha512"
+  ],
+  "logs": []
+}

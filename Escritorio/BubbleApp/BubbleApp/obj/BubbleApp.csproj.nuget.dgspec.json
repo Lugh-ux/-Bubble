@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\BubbleApp.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\BubbleApp.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\BubbleApp.csproj",
+        "projectName": "BubbleApp",
+        "projectPath": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\BubbleApp.csproj",
+        "packagesPath": "C:\\Users\\ikerm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ikerm\\Desktop\\ProyectoIntermodular\\Escritorio\\BubbleApp\\BubbleApp\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\ikerm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net472"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net472": {
+            "projectReferences": {}
+          }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net472": {
+          "dependencies": {
+            "Microsoft.Web.WebView2": {
+              "target": "Package",
+              "version": "[1.0.2903.40, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-arm64": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

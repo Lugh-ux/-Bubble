@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bubble extends Model
 {
-    protected $fillable = ['user_id', 'latitude', 'longitude'];
+    protected $fillable = ['user_id', 'latitude', 'longitude', 'mensaje'];
 
     public function user() {
         return $this->belongsTo(User::class);

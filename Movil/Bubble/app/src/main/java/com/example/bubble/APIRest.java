@@ -139,7 +139,7 @@ public class APIRest {
                                         .position(pos)
                                         .title("Burbuja de " + nombreAutor)
                                         .snippet("Usuario ID: " + obj.getInt("user_id"))
-                                        .alpha(0.0f)
+                                        .alpha(1.0f)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                             }
                         } catch (Exception e) {
