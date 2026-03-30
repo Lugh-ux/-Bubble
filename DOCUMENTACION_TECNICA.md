@@ -1612,21 +1612,5 @@ php artisan make:controller Api/NuevaFuncionalidadController
 - **Web**: Code splitting, PWA, Service Workers
 - **General**: CDN, logging centralizado, APM
 
----
-
-## 📚 Referencias
-
-- **Laravel**: https://laravel.com/docs
-- **Android**: https://developer.android.com
-- **.NET**: https://docs.microsoft.com/dotnet
-- **Google Maps**: https://developers.google.com/maps
-
----
-
-## ✅ Historial
-
-| Versión | Fecha | Cambios |
-|---------|-------|---------|
-| 1.0 | 2026-03-29 | Documentación inicial |
 
 **Fin de Documentación**
