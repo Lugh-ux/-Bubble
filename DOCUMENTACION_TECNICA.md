@@ -6,13 +6,13 @@
 
 **Aplicación**: **BUBBLE** - Red social basada en Geo-localizacion
 
-**Autor/a**: [Iker Martinez Lago]
+**Autor**: [Iker Martinez Lago]
 
 **Fecha**: Marzo 2026
 
 ---
 
-## 📑 Índice de Contenidos
+## Índice de Contenidos
 
 1. [Arquitectura del Sistema](#1-arquitectura-del-sistema)
 2. [API](#2-api)
@@ -77,7 +77,7 @@ La aplicación **BUBBLE** es un sistema distribuido de tres capas:
 #### Backend (API + Web Integrados en Laravel)
 - **Framework**: Laravel 12
 - **Lenguaje**: PHP 8.2+
-- **Base de Datos**: SQLite (desarrollo) / MySQL/PostgreSQL (producción)
+- **Base de Datos**: MySQL/PostgreSQL (producción)
 - **ORM**: Eloquent
 - **Autenticación**: 
   - **Web**: Session-based (guard web)
@@ -86,11 +86,11 @@ La aplicación **BUBBLE** es un sistema distribuido de tres capas:
 #### Frontend Web (Integrado en Laravel)
 - **Templating**: Blade (SSR)
 - **CSS**: Tailwind CSS v4.0.0
-- **JavaScript**: Vanilla ES6+ + Axios 1.11.0
+- **JavaScript**: Vanilla ES6+ 
 - **Mapas**: Google Maps API v3
 - **Build Tool**: Vite 7.0.7
 - **Package Manager**: npm
-- **Servidor**: Apache/Nginx (Vite para desarrollo)
+- **Servidor**: Apache
 
 #### Aplicación Móvil
 - **Plataforma**: Android
@@ -110,7 +110,7 @@ La aplicación **BUBBLE** es un sistema distribuido de tres capas:
 - **Framework**: .NET Framework 4.7.2
 - **UI**: Windows Forms (WinForms)
 - **Componentes Personalizados**: Radar Map Control
-- **WebView**: Microsoft.Web.WebView2 (v1.0.2903.40)
+- **WebView**: Microsoft.Web.WebView2 (Mapa)
 
 ### 1.3 Flujo de Comunicación
 
@@ -223,8 +223,8 @@ Content-Type: application/json
 {
   "name": "Iker Martinez",
   "email": "iker@example.com",
-  "password": "SecurePass123!",
-  "password_confirmation": "SecurePass123!"
+  "password": "1234",
+  "password_confirmation": "1234"
 }
 ```
 
@@ -263,7 +263,7 @@ Content-Type: application/json
 
 {
   "email": "iker@example.com",
-  "password": "SecurePass123!"
+  "password": "1234"
 }
 ```
 
@@ -300,7 +300,7 @@ Content-Type: application/json
 {
   "latitude": 40.4168,
   "longitude": -3.7038,
-  "mensaje": "¡Qué día tan bonito en Madrid!"
+  "mensaje": "Esto es una burbuja"
 }
 ```
 
@@ -313,7 +313,7 @@ Content-Type: application/json
     "user_id": 1,
     "latitude": 40.4168,
     "longitude": -3.7038,
-    "mensaje": "¡Qué día tan bonito en Madrid!"
+    "mensaje": "Esto es una burbuja"
   }
 }
 ```
@@ -329,14 +329,14 @@ Host: localhost:8000
 **Respuesta (200):**
 ```json
 {
-  "message": "Bubbles retrieved successfully",
+  "message": "Bubbles devueltas correctamente",
   "bubbles": [
     {
       "id": 1,
       "user_id": 1,
       "latitude": 40.4168,
       "longitude": -3.7038,
-      "mensaje": "¡Qué día tan bonito en Madrid!",
+      "mensaje": "Una burbuja",
       "user": {
         "id": 1,
         "name": "Iker Martinez Lago",
@@ -385,7 +385,7 @@ Content-Type: application/json
 **Respuesta (200):**
 ```json
 {
-  "message": "Profile updated successfully",
+  "message": "Perfil actualizado correctamente",
   "user": {
     "id": 1,
     "name": "Iker Martinez Lago",
@@ -428,7 +428,7 @@ Authorization: Bearer 1|abc123def456...
 
 ### 3.1 Descripción
 
-La base de datos utiliza **SQLite** con Laravel **Eloquent ORM** para gestión de modelos y relaciones.
+La base de datos utiliza **MySQL** con Laravel **Eloquent ORM** para gestión de modelos y relaciones.
 
 **Ubicación**: `bd/bubble-api/database/database.sqlite`
 
@@ -456,16 +456,14 @@ La base de datos utiliza **SQLite** con Laravel **Eloquent ORM** para gestión d
 │      BUBBLES             │
 ├──────────────────────────┤
 │ id (PK)                  │
-│ user_id (FK) ───┐        │
-│ latitude        │        │
-│ longitude       │        │
-│ mensaje         │        │
-│ created_at      │        │
-│ updated_at      │        │
-└──────────────────┤───────┘
-                   │
-                   └─ Relación: User hasMany Bubble
-                      Bubble belongsTo User
+│ user_id (FK)             │
+│ latitude                 │
+│ longitude                │
+│ mensaje                  │
+│ created_at               │
+│ updated_at               │
+└──────────────────────────┘
+                   
 
 ┌──────────────────────────────────────┐
 │ PERSONAL_ACCESS_TOKENS (Sanctum)     │
@@ -565,9 +563,6 @@ La base de datos utiliza **SQLite** con Laravel **Eloquent ORM** para gestión d
 - FOREIGN KEY: `user_id` → `users(id)`
 
 **Validaciones**:
-- Latitud entre -90 y 90
-- Longitud entre -180 y 180
-- Mensaje no vacío (máx 1000 caracteres)
 - Usuario debe existir
 
 #### 3.3.3 Tabla `personal_access_tokens` (Sanctum)
@@ -674,7 +669,7 @@ php artisan db:seed
 | **Lenguaje Backend** | PHP | 8.2+ |
 | **Frontend Rendering** | Blade (SSR) | Laravel nativa |
 | **CSS** | Tailwind CSS | v4.0.0 |
-| **JavaScript** | Vanilla JS + Axios | ES6+ |
+| **JavaScript** | Vanilla JS |
 | **Mapas** | Google Maps API | v3 |
 | **Build Tool** | Vite | v7.0.7 |
 | **Package Manager** | npm | - |
@@ -739,7 +734,6 @@ bubble-api/
 
 **Características**:
 - Formulario de autenticación
-- Diseño dark theme (#131313)
 - Fondo animado GIF
 - Layout responsive (2 columnas en desktop, 1 en móvil)
 - Links para recuperar contraseña y registro
@@ -794,11 +788,10 @@ bubble-api/
    - Colores: Verde (#2ecc71) para burbujas activas
 
 2. **Centro (Google Maps)**
-   - Mapa interactivo con zoom 17x y tilt 45°
+   - Mapa interactivo 
    - Marcador de usuario (posición actual)
    - Círculos/marcadores para burbujas
    - Geolocalización automática (`navigator.geolocation.watchPosition()`)
-   - Capa de tráfico opcional
 
 3. **Columna Derecha (Perfil de Usuario)**
    - Avatar del usuario autenticado
@@ -1200,6 +1193,7 @@ Movil/Bubble/
 ### 6.2 Tecnología
 
 - **Lenguaje**: C#
+- **Recursos**: Guia atraves de IA para desarrolo e API
 - **Framework**: .NET Framework 4.7.2
 - **UI**: Windows Forms (WinForms)
 - **Proyecto**: `BubbleApp.sln`
@@ -1264,7 +1258,6 @@ Escritorio/BubbleApp/
 
 - Visualizar datos del usuario
 - Editar nombre, avatar
-- Ver historial de burbujas creadas
 - Botón cerrar sesión
 
 #### 6.5.4 FormularioRegistro
@@ -1315,7 +1308,7 @@ Control personalizado que representa:
 - Posición del usuario (centro)
 - Burbujas cercanas (puntos en radio)
 - Interactividad (zoom, pan)
-- Colores por tipo o antigüedad
+- Colores segun actividad
 
 ---
 
@@ -1326,12 +1319,11 @@ Control personalizado que representa:
 | Mecanismo | Descripción |
 |-----------|-------------|
 | **Autenticación Sanctum** | Tokens API para desktop/móvil + Sessions para web |
-| **BCrypt Hashing** | Contraseñas hasheadas con 10 rondas mínimas |
+| **BCrypt Hashing** | Contraseñas hasheadas |
 | **HTTPS/TLS** | Certificado SSL obligatorio en producción |
 | **SQL Injection Prevention** | Eloquent ORM con prepared statements |
 | **CSRF Protection** | Tokens CSRF en formularios web |
-| **Password Validation** | Email único, contraseña mín 8 caracteres |
-| **Rate Limiting** | Límite de peticiones por IP/usuario |
+| **Password Validation** | Email único |
 
 ### 7.2 Autenticación
 
@@ -1351,7 +1343,6 @@ Control personalizado que representa:
 - **Contraseñas**: Hasheadas con BCrypt
 - **Tokens**: Almacenados hasheados en BD
 - **Sessions**: Archivo seguro con permisos restringidos
-- **API Keys**: Guardar en `.env` (nunca en código)
 
 **Validaciones en modelos**:
 ```php
@@ -1380,8 +1371,8 @@ SANCTUM_STATEFUL_DOMAINS=bubble.com
 **Backend (API)**:
 - PHP 8.2+
 - Composer
-- SQLite3
-- Node.js + npm (para Vite)
+- SQL
+- Node.js + npm
 
 **Móvil (Android)**:
 - Android Studio
@@ -1464,10 +1455,10 @@ Debug > Start Debugging (F5)
 4. Configurar `.env` con BD MySQL/PostgreSQL
 5. Generar key: `php artisan key:generate`
 6. Migraciones: `php artisan migrate`
-7. Configurar web server (Nginx o Apache)
+7. Configurar web server 
 8. Habilitar HTTPS con Let's Encrypt
 
-**Base de datos**: Cambiar de SQLite a MySQL/PostgreSQL en producción
+**Base de datos**:  MySQL en producción
 
 **Dominio**: Apuntar DNS a IP del servidor
 
@@ -1498,7 +1489,7 @@ php artisan test
 
 Ejecuta pruebas unitarias e integración en `tests/Feature/`
 
-### 9.2 Pruebas API (Postman/Insomnia)
+### 9.2 Pruebas API 
 
 Importar colección con endpoints:
 - POST /api/desktop/login (credenciales válidas/inválidas)
@@ -1606,27 +1597,11 @@ php artisan make:controller Api/NuevaFuncionalidadController
 
 ### 11.2 Optimizaciones
 
-- **Backend**: Redis cache, índices BD, async jobs
+- **Backend**: Indices BD, async jobs
 - **Móvil**: Lazy loading, batería optimizada
 - **Desktop**: Caché local, renderizado async
-- **Web**: Code splitting, PWA, Service Workers
-- **General**: CDN, logging centralizado, APM
+- **Web**: PWA, Service Workers
+- **General**: Logging centralizado
 
----
-
-## 📚 Referencias
-
-- **Laravel**: https://laravel.com/docs
-- **Android**: https://developer.android.com
-- **.NET**: https://docs.microsoft.com/dotnet
-- **Google Maps**: https://developers.google.com/maps
-
----
-
-## ✅ Historial
-
-| Versión | Fecha | Cambios |
-|---------|-------|---------|
-| 1.0 | 2026-03-29 | Documentación inicial |
 
 **Fin de Documentación**
