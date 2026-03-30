@@ -6,7 +6,7 @@
 
 **Aplicación**: **BUBBLE** - Red social basada en Geo-localizacion
 
-**Autor/a**: [Iker Martinez Lago]
+**Autor**: [Iker Martinez Lago]
 
 **Fecha**: Marzo 2026
 
